@@ -1,0 +1,118 @@
+<div class="layout-container">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-left">
+      <button class="hamburger-btn" (click)="toggleSidebar()">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+        </svg>
+      </button>
+      <a routerLink="/" class="logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" width="28" height="28">
+          <path fill="#FF0000" d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 3.993L9 16z"/>
+        </svg>
+        <span class="logo-text">Jutjubić</span>
+      </a>
+    </div>
+
+    <div class="navbar-center">
+      <div class="search-container">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Pretraži"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+        />
+        @if (searchQuery) {
+          <button class="search-clear" (click)="clearSearch()">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+        }
+        <button class="search-btn" (click)="onSearch()">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="navbar-right">
+      @if (currentUser) {
+        <div class="user-menu">
+          <button class="profile-btn" [routerLink]="['/profile']">
+            <div class="avatar">{{ currentUser.firstName.charAt(0) }}{{ currentUser.lastName.charAt(0) }}</div>
+          </button>
+        </div>
+      } @else {
+        <div class="auth-buttons">
+          <a routerLink="/login" class="btn-signin">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+            </svg>
+            <span>Prijava</span>
+          </a>
+        </div>
+      }
+    </div>
+  </nav>
+
+  <!-- Sidebar Overlay -->
+  @if (sidebarExpanded) {
+    <div class="sidebar-overlay" (click)="toggleSidebar()"></div>
+  }
+
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.expanded]="sidebarExpanded">
+    <div class="sidebar-content">
+      <a routerLink="/" class="sidebar-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+        </svg>
+        <span class="sidebar-text">Početna</span>
+      </a>
+      <a routerLink="/trending" class="sidebar-item" routerLinkActive="active">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <path fill="currentColor" d="M17.53 11.2c-.23-.3-.5-.56-.76-.82-.65-.6-1.4-1.03-2.03-1.66C13.5 7.5 13 6.2 13 4.9c0-.17.01-.34.03-.5-.28.14-.55.31-.79.5-1.72 1.34-2.74 3.5-2.74 5.47 0 2.04.63 3.96 1.8 5.44 1.15 1.46 2.82 2.57 4.7 2.93.6.12 1.23.17 1.87.14-.16-.37-.34-.75-.55-1.12-.17-.3-.35-.6-.55-.9-.2-.3-.42-.6-.67-.87z"/>
+          <path fill="currentColor" d="M12 22c-4.97 0-9-4.03-9-9 0-2.25.83-4.32 2.19-5.91l.02-.02C6.77 5.5 8.27 4.24 10 3.56v1.34c0 1.3.5 2.6 1.5 3.6.63.63 1.4 1.08 2.06 1.68.28.26.54.54.79.86.1.13.2.26.28.4 1.2 1.64 1.87 3.64 1.87 5.66 0 2.4-1.07 4.55-2.75 6.02l-.05.04C13.06 22.85 12.54 23 12 23c-.54 0-1.06-.15-1.52-.44l-.03-.02v-.03c-.18-.13-.35-.28-.51-.44-.85-.85-1.39-2.02-1.39-3.3 0-1.23.5-2.34 1.31-3.16l.17-.17c.48-.47 1.1-.78 1.79-.87-.04.4-.06.8-.06 1.2 0 1.31.5 2.6 1.5 3.6.63.63 1.38 1.06 2.03 1.66.26.26.53.52.76.82z"/>
+        </svg>
+        <span class="sidebar-text">U trendu</span>
+      </a>
+
+      @if (currentUser) {
+        <hr class="sidebar-divider" />
+        <a routerLink="/profile" class="sidebar-item" routerLinkActive="active">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+          </svg>
+          <span class="sidebar-text">Profil</span>
+        </a>
+        <button class="sidebar-item logout-btn" (click)="logout()">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+          </svg>
+          <span class="sidebar-text">Odjava</span>
+        </button>
+      } @else {
+        <hr class="sidebar-divider" />
+        <div class="sidebar-auth-prompt">
+          <p>Prijavite se da biste lajkovali video snimke, komentarisali i pretplatili se.</p>
+          <a routerLink="/login" class="sidebar-signin-btn">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+            </svg>
+            <span>Prijava</span>
+          </a>
+        </div>
+      }
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content" [class.sidebar-expanded]="sidebarExpanded">
+    <router-outlet></router-outlet>
+  </main>
+</div>
+

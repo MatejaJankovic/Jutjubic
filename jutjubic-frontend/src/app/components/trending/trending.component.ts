@@ -1,41 +1,32 @@
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, ActivatedRoute } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { Video, VideoPageResponse } from '../../models/video.model';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-trending',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
+  templateUrl: './trending.component.html',
+  styleUrls: ['./trending.component.scss'],
 })
-export class HomeComponent implements OnInit, OnDestroy {
+export class TrendingComponent implements OnInit, OnDestroy {
   videos: Video[] = [];
   loading = false;
   currentPage = 0;
   totalPages = 0;
   hasNext = false;
-  searchQuery = '';
   private subscription = new Subscription();
 
   constructor(
     private videoService: VideoService,
-    private router: Router,
-    private route: ActivatedRoute
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.subscription.add(
-      this.route.queryParams.subscribe(params => {
-        this.searchQuery = params['search'] || '';
-        this.currentPage = 0;
-        this.videos = [];
-        this.loadVideos();
-      })
-    );
+    this.loadVideos();
   }
 
   ngOnDestroy(): void {
@@ -46,12 +37,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.loading) return;
     this.loading = true;
 
-    const request = this.searchQuery
-      ? this.videoService.searchVideos(this.searchQuery, this.currentPage, 12)
-      : this.videoService.getAllVideos(this.currentPage, 12);
-
     this.subscription.add(
-      request.subscribe({
+      this.videoService.getTrendingVideos(this.currentPage, 12).subscribe({
         next: (response: VideoPageResponse) => {
           this.videos = [...this.videos, ...response.videos];
           this.totalPages = response.totalPages;
