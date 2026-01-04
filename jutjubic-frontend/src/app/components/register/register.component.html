@@ -1,0 +1,145 @@
+<div class="register-container">
+  <div class="register-card">
+    <h1>Registracija</h1>
+    <p class="subtitle">Kreirajte novi nalog na Jutjubić platformi</p>
+
+    @if (successMessage) {
+      <div class="alert alert-success">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        {{ successMessage }}
+      </div>
+    }
+
+    @if (errorMessage && !successMessage) {
+      <div class="alert alert-error">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        {{ errorMessage }}
+      </div>
+    }
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">Ime <span class="required">*</span></label>
+          <input
+            type="text"
+            id="firstName"
+            formControlName="firstName"
+            [class.error]="hasFieldError('firstName')"
+            placeholder="Unesite ime"
+          />
+          @if (hasFieldError('firstName')) {
+            <span class="error-message">{{ getFieldError('firstName') }}</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Prezime <span class="required">*</span></label>
+          <input
+            type="text"
+            id="lastName"
+            formControlName="lastName"
+            [class.error]="hasFieldError('lastName')"
+            placeholder="Unesite prezime"
+          />
+          @if (hasFieldError('lastName')) {
+            <span class="error-message">{{ getFieldError('lastName') }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email adresa <span class="required">*</span></label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          [class.error]="hasFieldError('email')"
+          placeholder="primer@example.com"
+        />
+        @if (hasFieldError('email')) {
+          <span class="error-message">{{ getFieldError('email') }}</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="username">Korisničko ime <span class="required">*</span></label>
+        <input
+          type="text"
+          id="username"
+          formControlName="username"
+          [class.error]="hasFieldError('username')"
+          placeholder="Unesite korisničko ime (3-50 karaktera)"
+        />
+        @if (hasFieldError('username')) {
+          <span class="error-message">{{ getFieldError('username') }}</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="address">Adresa <span class="required">*</span></label>
+        <input
+          type="text"
+          id="address"
+          formControlName="address"
+          [class.error]="hasFieldError('address')"
+          placeholder="Unesite adresu"
+        />
+        @if (hasFieldError('address')) {
+          <span class="error-message">{{ getFieldError('address') }}</span>
+        }
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Lozinka <span class="required">*</span></label>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            [class.error]="hasFieldError('password')"
+            placeholder="Minimum 6 karaktera"
+          />
+          @if (hasFieldError('password')) {
+            <span class="error-message">{{ getFieldError('password') }}</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Potvrda lozinke <span class="required">*</span></label>
+          <input
+            type="password"
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            [class.error]="hasFieldError('confirmPassword')"
+            placeholder="Ponovite lozinku"
+          />
+          @if (hasFieldError('confirmPassword')) {
+            <span class="error-message">{{ getFieldError('confirmPassword') }}</span>
+          }
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+        @if (isSubmitting) {
+          <span class="spinner"></span>
+          Registracija u toku...
+        } @else {
+          Registruj se
+        }
+      </button>
+    </form>
+
+    <div class="login-link">
+      <p>Već imate nalog? <a routerLink="/login">Prijavite se</a></p>
+    </div>
+  </div>
+</div>
+
