@@ -44,7 +44,7 @@ public class AuthController {
         authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(MessageResponse.builder()
-                        .message("Registracija uspešna! Aktivacioni token je sačuvan. Proverite konzolu aplikacije ili bazu podataka.")
+                        .message("Registracija uspešna! Proverite vašu email inbox radi verifikacije naloga.")
                         .success(true)
                         .build());
     }

@@ -32,6 +32,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
 
     @Transactional
     public void register(RegisterRequest request) {
@@ -69,6 +70,15 @@ public class AuthService {
 
         userRepository.save(user);
         log.info("User registered successfully: {} with activation token: {}", user.getEmail(), activationToken);
+
+        // Send activation email
+        try {
+            emailService.sendActivationEmail(user, activationToken);
+            log.info("Activation email queued for sending to: {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send activation email to: {}", user.getEmail(), e);
+            // Don't throw exception - user is already registered, just log the error
+        }
     }
 
     @Transactional

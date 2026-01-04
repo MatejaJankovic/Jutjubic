@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
@@ -22,7 +23,8 @@ export class LoginComponent {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -34,43 +36,61 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
+    // Clear previous error
     this.errorMessage = '';
 
+    // Validate form
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
 
     this.isSubmitting = true;
-    this.authService.login(this.loginForm.value).subscribe({
-      next: (response) => {
-        // Navigate to return URL or home page
-        this.router.navigate([this.returnUrl]);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.isSubmitting = false;
-        if (error.status === 429) {
-          // Rate limit exceeded
-          const retryAfter = error.error?.retryAfter;
-          if (retryAfter) {
-            this.errorMessage = `Previše pokušaja prijave. Pokušajte ponovo za ${retryAfter} sekundi.`;
+    this.cdr.detectChanges(); // Force UI update to show loading state
+
+    this.authService.login(this.loginForm.value)
+      .pipe(
+        finalize(() => {
+          // This will ALWAYS run, whether success or error
+          this.isSubmitting = false;
+          this.cdr.detectChanges(); // Force UI update to hide loading state
+        })
+      )
+      .subscribe({
+        next: () => {
+          // Navigate to return URL or home page
+          this.router.navigate([this.returnUrl]);
+        },
+        error: (error: HttpErrorResponse) => {
+          // Handle different error types
+          if (error.status === 429) {
+            // Rate limit exceeded
+            const retryAfter = error.error?.retryAfter;
+            if (retryAfter) {
+              this.errorMessage = `Previše pokušaja prijave. Pokušajte ponovo za ${retryAfter} sekundi.`;
+            } else if (error.error?.message) {
+              this.errorMessage = error.error.message;
+            } else {
+              this.errorMessage = 'Previše pokušaja prijave. Molimo sačekajte.';
+            }
+          } else if (error.status === 400) {
+            // Bad request - invalid credentials or disabled account
+            this.errorMessage = error.error?.message || 'Pogrešan email ili lozinka.';
+          } else if (error.status === 0) {
+            // Network error
+            this.errorMessage = 'Ne mogu se povezati sa serverom. Proverite internet konekciju.';
           } else if (error.error?.message) {
+            // Any other error with message
             this.errorMessage = error.error.message;
           } else {
-            this.errorMessage = 'Previše pokušaja prijave. Molimo sačekajte.';
+            // Generic error
+            this.errorMessage = 'Došlo je do greške. Pokušajte ponovo.';
           }
-        } else if (error.error?.message) {
-          this.errorMessage = error.error.message;
-        } else if (error.status === 0) {
-          this.errorMessage = 'Ne mogu se povezati sa serverom. Proverite internet konekciju.';
-        } else {
-          this.errorMessage = 'Pogrešan email ili lozinka.';
-        }
-      },
-      complete: () => {
-        this.isSubmitting = false;
-      },
-    });
+
+          // Force immediate UI update to show error message
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   getFieldError(fieldName: string): string | null {

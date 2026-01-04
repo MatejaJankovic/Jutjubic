@@ -27,10 +27,17 @@ app.base-url=http://localhost:8080
 app.frontend-url=http://localhost:4200
 
 # Email Configuration (Gmail SMTP)
+# INSTRUCTIONS:
+# 1. Go to https://myaccount.google.com/ and enable 2-Step Verification
+# 2. Go to Security -> 2-Step Verification -> App passwords
+# 3. Generate a new App Password for "Mail" or "Other (Custom: Jutjubic)"
+# 4. Copy the 16-character password (remove spaces!)
+# 5. Replace YOUR_EMAIL and YOUR_APP_PASSWORD below with your actual credentials
+# 6. NEVER commit this file with real credentials to Git!
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
-spring.mail.username=jankovicmatejabp@gmail.com
-spring.mail.password=absg awsl drps orny
+spring.mail.username=YOUR_EMAIL@gmail.com
+spring.mail.password=YOUR_APP_PASSWORD
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 spring.mail.properties.mail.smtp.starttls.required=true
@@ -39,8 +46,8 @@ spring.mail.properties.mail.smtp.timeout=5000
 spring.mail.properties.mail.smtp.writetimeout=5000
 
 # Email Sender Configuration
-email.from=jankovicmatejabp@gmail.com
-email.from-name=Jutjubic
+email.from=YOUR_EMAIL@gmail.com
+email.from-name=Jutjubic Tim
 
 # Rate Limiting
 rate.limit.login.max-attempts=5
@@ -51,8 +58,4 @@ springdoc.api-docs.path=/v3/api-docs
 springdoc.swagger-ui.path=/swagger-ui.html
 springdoc.swagger-ui.operationsSorter=method
 springdoc.swagger-ui.tagsSorter=alpha
-
-
-
-
 
