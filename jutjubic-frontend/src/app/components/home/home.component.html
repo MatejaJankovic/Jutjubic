@@ -1,0 +1,59 @@
+<div class="home-container">
+  <nav class="navbar">
+    <div class="navbar-content">
+      <div class="logo">
+        <h1>Jutjubić</h1>
+      </div>
+      <div class="nav-actions">
+        @if (currentUser) {
+          <div class="user-info">
+            <span class="welcome-text">Dobrodošli, {{ currentUser.firstName }}!</span>
+            <button class="btn-logout" (click)="logout()">Odjavi se</button>
+          </div>
+        } @else {
+          <div class="auth-buttons">
+            <a routerLink="/login" class="btn-login">Prijava</a>
+            <a routerLink="/register" class="btn-register">Registracija</a>
+          </div>
+        }
+      </div>
+    </div>
+  </nav>
+
+  <div class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">Dobrodošli na Jutjubić</h1>
+      <p class="hero-subtitle">Društvena mreža za deljenje video sadržaja</p>
+
+      @if (currentUser) {
+        <div class="user-details">
+          <div class="card">
+            <h2>Informacije o profilu</h2>
+            <div class="info-row">
+              <span class="label">Ime:</span>
+              <span class="value">{{ currentUser.firstName }} {{ currentUser.lastName }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Email:</span>
+              <span class="value">{{ currentUser.email }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Korisničko ime:</span>
+              <span class="value">{{ currentUser.username }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Uloga:</span>
+              <span class="value">{{ currentUser.role }}</span>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="cta-buttons">
+          <a routerLink="/register" class="btn-primary">Kreirajte nalog</a>
+          <a routerLink="/login" class="btn-secondary">Već imate nalog?</a>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
