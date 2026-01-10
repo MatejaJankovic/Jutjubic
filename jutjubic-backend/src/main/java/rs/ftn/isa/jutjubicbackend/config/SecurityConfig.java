@@ -43,6 +43,7 @@ public class SecurityConfig {
 
                         // sve ostalo javno (videi + komentari + ostale video rute)
                         .requestMatchers("/api/videos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
 
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
