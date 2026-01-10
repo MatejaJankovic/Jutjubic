@@ -1,0 +1,96 @@
+.create-video-form {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 30px 40px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: 'Segoe UI', sans-serif;
+
+  input[type="text"],
+  textarea,
+  input[type="file"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    outline: none;
+    background-color: #fafafa;
+
+    &:focus {
+      border-color: #ff0000;
+      box-shadow: 0 0 0 3px rgba(255,0,0,0.1);
+      background-color: #fff;
+    }
+  }
+
+  textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+    display: inline-block;
+  }
+
+  button[type="submit"] {
+    padding: 14px 20px;
+    background-color: #ff0000;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background-color: #e60000;
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      background-color: #ff8a8a;
+      cursor: not-allowed;
+    }
+  }
+
+  .uploading-status {
+    font-size: 14px;
+    font-style: italic;
+    color: #555;
+  }
+
+  .error {
+    color: #ff0000;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  @media (max-width: 640px) {
+    padding: 20px;
+    gap: 15px;
+
+    input[type="text"],
+    textarea,
+    input[type="file"],
+    button[type="submit"] {
+      font-size: 14px;
+      padding: 10px 14px;
+    }
+  }
+.file-info {
+  margin-top: 4px;
+  font-size: 14px;
+  color: #4caf50;
+}
+
+}

@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { Video } from '../../models/video.model';
 import { Subscription } from 'rxjs';
+import { environment } from '../../env/environment';
 
 @Component({
   selector: 'app-watch',
@@ -14,8 +15,9 @@ import { Subscription } from 'rxjs';
 })
 export class WatchComponent implements OnInit, OnDestroy {
   video: Video | null = null;
-  loading = true;
   error = false;
+  loading = false;
+  environment = environment;
   private subscription = new Subscription();
 
   constructor(
@@ -27,9 +29,8 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.route.params.subscribe(params => {
         const id = +params['id'];
-        if (id) {
-          this.loadVideo(id);
-        }
+        if (id) this.loadVideo(id);
+        else this.error = true;
       })
     );
   }
@@ -39,23 +40,18 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   loadVideo(id: number): void {
-    this.loading = true;
-    this.error = false;
-
-    this.subscription.add(
-      this.videoService.getVideoById(id).subscribe({
-        next: (video) => {
-          this.video = video;
-          this.loading = false;
-          // Increment view count
-          this.videoService.incrementViewCount(id).subscribe();
-        },
-        error: () => {
-          this.error = true;
-          this.loading = false;
-        }
-      })
-    );
+    this.loading = true; // Dodaj loading flag ako želiš
+    this.videoService.getVideoById(id).subscribe({
+      next: (v) => {
+        this.video = v;
+        this.error = false;
+        // Opciono: pozovi view count
+        this.videoService.incrementViewCount(id).subscribe();
+      },
+      error: () => {
+        this.error = true;
+      }
+    });
   }
 
   formatViewCount(count: number): string {

@@ -1,8 +1,13 @@
 package rs.ftn.isa.jutjubicbackend.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import rs.ftn.isa.jutjubicbackend.dto.CreateVideoRequest;
 import rs.ftn.isa.jutjubicbackend.dto.VideoDTO;
 import rs.ftn.isa.jutjubicbackend.dto.VideoPageResponse;
 import rs.ftn.isa.jutjubicbackend.service.VideoService;
@@ -48,6 +53,18 @@ public class VideoController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size) {
         return ResponseEntity.ok(videoService.getTrendingVideos(page, size));
+    }
+
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<VideoDTO> createVideo(
+            @RequestParam("data") String dataJson,
+            @RequestPart("video") MultipartFile video,
+            @RequestPart("thumbnail") MultipartFile thumbnail) throws JsonProcessingException {
+
+        CreateVideoRequest request = new ObjectMapper().readValue(dataJson, CreateVideoRequest.class);
+        VideoDTO created = videoService.createVideo(request, video, thumbnail);
+        return ResponseEntity.ok(created);
     }
 }
 
