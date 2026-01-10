@@ -35,10 +35,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/ping").permitAll()
+
                         .requestMatchers("/api/auth/**").permitAll()
 
                         // jedino ovo mora biti ulogovano
-                        .requestMatchers(HttpMethod.POST, "/api/videos/{videoId}/comments").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/videos/*/comments").authenticated()
 
                         // sve ostalo javno (videi + komentari + ostale video rute)
                         .requestMatchers("/api/videos/**").permitAll()
@@ -70,3 +71,11 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
+
+
+
+
+
+
+

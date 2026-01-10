@@ -4,16 +4,19 @@ import { CommentsService } from '../../services/comments.service';
 import { Comment } from '../../models/comment.model';
 import { NgIf, NgFor } from '@angular/common';
 
+import { ProfileComponent } from '../profile/profile.component';
+import {RouterLink} from '@angular/router';
+
 @Component({
   selector: 'app-comment-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   template: `
     <div class="comments">
       <h3>Comments ({{ total }})</h3>
       <div *ngIf="comments.length === 0">No comments yet.</div>
       <div *ngFor="let c of comments" class="comment">
-        <div class="meta">{{ c.authorUsername }} • {{ c.createdAt | date:'short' }}</div>
+        <div class="meta"><a [routerLink]="['/users', c.authorUsername]">{{ c.authorUsername }}</a> • {{ c.createdAt | date:'short' }}</div>
         <div class="text">{{ c.text }}</div>
       </div>
       <button *ngIf="hasMore" (click)="loadMore()" class="load-more">Load more</button>

@@ -1,0 +1,32 @@
+/* scss */
+/* File: jutjubic-frontend/src/app/components/profile/profile.component.scss */
+.profile-page {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-card {
+  background: #111;
+  color: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 720px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+
+  .username {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #fff;
+  }
+
+  .name {
+    margin-top: 0.5rem;
+    color: #cfcfcf;
+  }
+}
+
+.loader {
+  color: #fff;
+}

@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import rs.ftn.isa.jutjubicbackend.dto.CommentDto;
 import rs.ftn.isa.jutjubicbackend.model.Comment;
 import rs.ftn.isa.jutjubicbackend.model.Video;
@@ -24,6 +26,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final VideoRepository videoRepository;
 
+    @Cacheable(cacheNames = "comments", key = "#videoId + ':' + #page + ':' + #size")
     public Page<CommentDto> getComments(Long videoId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Comment> comments = commentRepository.findByVideoIdOrderByCreatedAtDesc(videoId, pageable);
@@ -31,6 +34,7 @@ public class CommentService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "comments", allEntries = true)
     public CommentDto createComment(Long videoId, String text, String authorUsername) {
         Comment comment = new Comment(text, videoId, authorUsername);
         comment.setCreatedAt(Instant.now());
