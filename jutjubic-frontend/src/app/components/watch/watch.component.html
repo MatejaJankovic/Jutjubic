@@ -77,16 +77,32 @@
           }
         </div>
 
-        <!-- Comments Section (Placeholder) -->
+        <!-- Comments Section -->
         <div class="comments-section">
-          <h3>{{ formatViewCount(video.commentCount) }} komentara</h3>
-          <div class="comments-placeholder">
-            <svg viewBox="0 0 24 24" width="48" height="48">
-              <path fill="currentColor" d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/>
-            </svg>
-            <p>Komentarisanje će uskoro biti dostupno</p>
-          </div>
+          <h3>{{ formatViewCount(video?.commentCount || 0) }} komentara</h3>
+
+          <!-- show comment UI only when videoId is available -->
+          <ng-container *ngIf="videoId; else commentsPlaceholder">
+            <app-comment-form [videoId]="videoId!" (posted)="onCommentPosted()"></app-comment-form>
+            <app-comment-list [videoId]="videoId!"></app-comment-list>
+          </ng-container>
+
+          <ng-template #commentsPlaceholder>
+            <div class="comments-placeholder">
+              <svg viewBox="0 0 24 24" width="48" height="48">
+                <path fill="currentColor" d="M21 6h-2v9H5v2c0 1.1.9 2 2 2h12l4 4V8c0-1.1-.9-2-2-2z"/>
+              </svg>
+              <p>Komentarisanje će uskoro biti dostupno</p>
+            </div>
+          </ng-template>
         </div>
+
+        <!-- keep existing watch layout and metadata; below add comments area -->
+        <div class="video-comments">
+          <app-comment-form *ngIf="videoId" [videoId]="videoId" (posted)="onCommentPosted()"></app-comment-form>
+          <app-comment-list *ngIf="videoId" [videoId]="videoId"></app-comment-list>
+        </div>
+
       </div>
 
       <!-- Sidebar with suggested videos (Placeholder) -->

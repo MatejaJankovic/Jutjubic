@@ -4,11 +4,14 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { Video } from '../../models/video.model';
 import { Subscription } from 'rxjs';
+import { CommentFormComponent } from '../comments/comment-form.component';
+import { CommentListComponent } from '../comments/comment-list.component';
 
 @Component({
   selector: 'app-watch',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, CommentFormComponent,
+    CommentListComponent],
   templateUrl: './watch.component.html',
   styleUrls: ['./watch.component.scss'],
 })
@@ -69,5 +72,18 @@ export class WatchComponent implements OnInit, OnDestroy {
   getChannelInitials(): string {
     if (!this.video) return '';
     return (this.video.userFirstName?.charAt(0) || '') + (this.video.userLastName?.charAt(0) || '');
+  }
+  // Add a small getter so template can use videoId safely
+  get videoId(): number | undefined {
+    return this.video?.id;
+  }
+
+  // Called by comment form when a new comment is posted
+  onCommentPosted(): void {
+    if (this.video) {
+      this.video.commentCount = (this.video.commentCount || 0) + 1;
+    }
+    // Optionally reload comments if your comment list does not auto-refresh
+    // e.g. this.commentList?.reload();
   }
 }

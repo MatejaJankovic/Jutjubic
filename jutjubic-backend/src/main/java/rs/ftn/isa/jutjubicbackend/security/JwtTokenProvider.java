@@ -26,8 +26,11 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return generateToken(userDetails.getUsername());
+        //UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        rs.ftn.isa.jutjubicbackend.model.User user = (rs.ftn.isa.jutjubicbackend.model.User) authentication.getPrincipal(); // CHANGED
+
+        //return generateToken(userDetails.getUsername());
+        return generateToken(user.getEmail()); // CHANGED
     }
 
     public String generateToken(String username) {

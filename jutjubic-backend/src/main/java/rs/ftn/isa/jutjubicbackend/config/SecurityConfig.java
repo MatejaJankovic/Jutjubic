@@ -3,6 +3,7 @@ package rs.ftn.isa.jutjubicbackend.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -35,10 +36,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/ping").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        // jedino ovo mora biti ulogovano
+                        .requestMatchers(HttpMethod.POST, "/api/videos/{videoId}/comments").authenticated()
+
+                        // sve ostalo javno (videi + komentari + ostale video rute)
                         .requestMatchers("/api/videos/**").permitAll()
+
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
+
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
