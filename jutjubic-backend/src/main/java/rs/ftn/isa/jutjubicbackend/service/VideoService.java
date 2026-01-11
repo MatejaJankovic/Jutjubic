@@ -214,7 +214,5 @@ public class VideoService {
 
         return Files.readAllBytes(realPath);
     }
-
-
 }
 

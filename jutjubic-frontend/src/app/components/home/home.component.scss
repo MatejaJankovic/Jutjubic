@@ -284,6 +284,7 @@ $border-color: #303030;
     transform: translateY(-2px);
   }
 }
+
 .video-preview {
   position: absolute; // preko thumbnail-a
   top: 0;
@@ -312,7 +313,6 @@ $border-color: #303030;
   height: 100%;
   background: rgba(0,0,0,0.8);
   display: flex;
-  justify-content: center;
   align-items: center;
   z-index: 1000;
 }

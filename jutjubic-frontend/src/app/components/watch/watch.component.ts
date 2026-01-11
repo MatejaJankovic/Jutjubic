@@ -40,7 +40,6 @@ export class WatchComponent implements OnInit, OnDestroy {
         if (this.video) {
           this.incrementViews(id);
         }
-
         else {
           this.loadVideo(id);
         }
