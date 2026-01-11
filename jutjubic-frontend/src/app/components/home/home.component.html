@@ -10,23 +10,38 @@
   <div class="video-grid">
     @for (video of videos; track video.id) {
       <div class="video-card" (click)="onVideoClick(video)">
-        <div class="thumbnail-container">
+        <div class="thumbnail-container" (click)="onVideoClick(video)">
+          <!-- Video za preview -->
+          <video
+            *ngIf="video.videoUrl"
+            class="video-preview"
+            [src]="environment.apiUrl + video.videoUrl"
+            preload="metadata"
+            muted
+            loop
+            (mouseenter)="playVideo($event)"
+            (mouseleave)="pauseVideo($event)"
+          ></video>
+
+          <!-- Thumbnail -->
           @if (video.thumbnailUrl) {
-            <img [src]="video.thumbnailUrl" [alt]="video.title" class="thumbnail" loading="lazy" />
+          <img [src]="environment.apiUrl + video.thumbnailUrl" [alt]="video.title" class="thumbnail" loading="lazy">
           } @else {
-            <div class="thumbnail-placeholder">
-              <svg viewBox="0 0 24 24" width="48" height="48">
-                <path fill="currentColor" d="M8 5v14l11-7z"/>
-              </svg>
-            </div>
+          <div class="thumbnail-placeholder">
+            <svg viewBox="0 0 24 24" width="48" height="48">
+              <path fill="currentColor" d="M8 5v14l11-7z"/>
+            </svg>
+          </div>
           }
-          <div class="duration-badge">{{ formatDuration(video.durationSeconds) }}</div>
+
+<!--          <div class="duration-badge">{{ formatDuration(video.durationSeconds) }}</div>-->
           <div class="thumbnail-overlay">
             <svg viewBox="0 0 24 24" width="48" height="48">
               <path fill="currentColor" d="M8 5v14l11-7z"/>
             </svg>
           </div>
         </div>
+
         <div class="video-info">
           <div class="channel-avatar">
             {{ getChannelInitials(video) }}
@@ -88,5 +103,16 @@
       </svg>
     </button>
   }
+  <!-- Video Modal -->
+  <div *ngIf="activeVideo" class="video-modal" (click)="closeVideoModal()">
+    <div class="video-modal-content" (click)="$event.stopPropagation()">
+      <video #modalVideo controls autoplay [src]="environment.apiUrl + activeVideo.videoUrl" [poster]="environment.apiUrl + activeVideo.thumbnailUrl"></video>
+      <h2>{{ activeVideo.title }}</h2>
+      <p>{{ activeVideo.userFirstName }} {{ activeVideo.userLastName }}</p>
+      <p>{{ activeVideo.description }}</p>
+      <button class="close-btn" (click)="closeVideoModal()">×</button>
+    </div>
+  </div>
+
 </div>
 

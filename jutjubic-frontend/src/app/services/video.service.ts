@@ -83,5 +83,17 @@ export class VideoService {
     if (diffMins > 0) return `pre ${diffMins} ${diffMins === 1 ? 'minut' : 'minuta'}`;
     return 'upravo sada';
   }
+
+  createVideo(formData: FormData, token: string) {
+    return this.http.post<any>(
+      'http://localhost:8080/api/videos',
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+  }
 }
 

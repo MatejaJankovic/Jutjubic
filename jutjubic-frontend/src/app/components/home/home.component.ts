@@ -4,6 +4,7 @@ import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { Video, VideoPageResponse } from '../../models/video.model';
 import { Subscription } from 'rxjs';
+import { environment } from '../../env/environment';
 
 @Component({
   selector: 'app-home',
@@ -19,6 +20,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   totalPages = 0;
   hasNext = false;
   searchQuery = '';
+  environment = environment;
+  activeVideo: Video | null = null;
   private subscription = new Subscription();
 
   constructor(
@@ -41,6 +44,20 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
+
+  onVideoClick(video: Video): void {
+    this.router.navigate(
+      ['/watch', video.id],
+      { state: { video } }
+    );
+  }
+
+
+
+  closeVideoModal(): void {
+    this.activeVideo = null;
+  }
+
 
   loadVideos(): void {
     if (this.loading) return;
@@ -81,9 +98,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  onVideoClick(video: Video): void {
-    this.router.navigate(['/watch', video.id]);
-  }
+//   onVideoClick(video: Video): void {
+//     this.router.navigate(['/watch', video.id]);
+//   }
 
   formatDuration(seconds: number): string {
     return this.videoService.formatDuration(seconds);
@@ -104,4 +121,16 @@ export class HomeComponent implements OnInit, OnDestroy {
   scrollToTop(): void {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  playVideo(event: Event) {
+    const video = event.target as HTMLVideoElement;
+    video.play().catch(err => console.log('Ne može da se reprodukuje video:', err));
+  }
+
+  pauseVideo(event: Event) {
+    const video = event.target as HTMLVideoElement;
+    video.pause();
+    video.currentTime = 0;
+  }
+
 }

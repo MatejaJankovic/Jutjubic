@@ -7,7 +7,7 @@ import { ActivateComponent } from './components/activate/activate.component';
 import { WatchComponent } from './components/watch/watch.component';
 import { TrendingComponent } from './components/trending/trending.component';
 import { guestGuard } from './guards/auth.guard';
-
+import { CreateVideoComponent } from './components/createVideo/createVideo.component';
 export const routes: Routes = [
   {
     path: '',
@@ -16,6 +16,10 @@ export const routes: Routes = [
       {
         path: '',
         component: HomeComponent,
+      },
+      {
+        path: 'create-video',
+        component: CreateVideoComponent
       },
       {
         path: 'watch/:id',
