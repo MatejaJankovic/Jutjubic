@@ -25,7 +25,7 @@ public class LoginRateLimiterService {
             return false;
         }
 
-        // Reset if window has passed
+
         if (attempts.getWindowStart().plusMinutes(windowMinutes).isBefore(LocalDateTime.now())) {
             attemptsCache.remove(ipAddress);
             return false;

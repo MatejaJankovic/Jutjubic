@@ -34,7 +34,7 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void createSampleData() {
-        // Create a demo user if not exists
+
         User demoUser = userRepository.findByEmail("demo@jutjubic.rs")
                 .orElseGet(() -> {
                     User user = User.builder()
@@ -50,7 +50,7 @@ public class DataLoader implements CommandLineRunner {
                     return userRepository.save(user);
                 });
 
-        // Create sample videos
+
         List<Video> videos = List.of(
                 Video.builder()
                         .title("Uvod u programiranje - Java za početnike")

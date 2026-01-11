@@ -19,7 +19,7 @@
   } @else {
     <div class="watch-content">
       <div class="video-section">
-        <!-- Video Player -->
+
         <div class="video-player">
           <video
             *ngIf="video?.videoUrl"
@@ -82,10 +82,10 @@
           }
         </div>
 
-        <!-- Comments Section -->
+
         <div class="comments-section">
 
-          <!-- show comment UI only when videoId is available -->
+
           <ng-container *ngIf="videoId; else commentsPlaceholder">
             <div class="comments-shell">
               <app-comment-form [videoId]="videoId!" (posted)="onCommentPosted()"></app-comment-form>
@@ -105,7 +105,7 @@
 
       </div>
 
-      <!-- Sidebar with suggested videos (Placeholder) -->
+
       <aside class="sidebar-section">
         <h3>Preporučeni video snimci</h3>
         <div class="suggested-placeholder">

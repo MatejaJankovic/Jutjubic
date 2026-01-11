@@ -16,7 +16,7 @@ public class Comment {
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
-    // lightweight references to avoid coupling with unknown existing User/Video entities
+
     @Column(nullable = false)
     private Long videoId;
 

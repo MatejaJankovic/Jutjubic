@@ -21,7 +21,7 @@ public class SwaggerAutoOpenConfig implements ApplicationListener<ApplicationRea
         String swaggerUrl = "http://localhost:" + serverPort + swaggerPath;
         String apiDocsUrl = "http://localhost:" + serverPort + "/v3/api-docs";
 
-        // Print beautiful banner in console with links
+
         printSwaggerBanner(swaggerUrl, apiDocsUrl);
     }
 

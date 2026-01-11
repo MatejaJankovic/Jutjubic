@@ -1,5 +1,5 @@
 // java
-// File: jutjubic-backend/src/main/java/rs/ftn/isa/jutjubicbackend/dto/UserProfileDto.java
+
 package rs.ftn.isa.jutjubicbackend.dto;
 
 public class UserProfileDto {

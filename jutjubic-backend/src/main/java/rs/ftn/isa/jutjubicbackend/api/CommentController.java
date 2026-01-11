@@ -21,7 +21,7 @@ public class CommentController {
         this.service = service;
     }
 
-    // public endpoint - paginated newest first
+
     @GetMapping
     public ResponseEntity<Page<CommentDto>> getComments(
             @PathVariable Long videoId,
@@ -32,7 +32,7 @@ public class CommentController {
         return ResponseEntity.ok(comments);
     }
 
-    // authenticated only: require Principal (if null -> 401)
+
     @PostMapping
     public ResponseEntity<?> postComment(
             @PathVariable Long videoId,
