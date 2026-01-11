@@ -1,0 +1,17 @@
+<!-- html -->
+<!-- File: jutjubic-frontend/src/app/components/profile/profile.component.html -->
+<div class="profile-page">
+  <div *ngIf="loading" class="loader">Učitavanje...</div>
+
+  <div *ngIf="error && !loading" class="alert alert-error">{{ error }}</div>
+
+  <div *ngIf="profile && !loading" class="profile-card">
+    <h2 class="username">{{ profile.username }}</h2>
+    <p class="name" *ngIf="profile.firstName || profile.lastName">
+      {{ profile.firstName }} {{ profile.lastName }}
+    </p>
+
+    <!-- Optional: place for user's videos list if implemented later -->
+    <!-- <app-video-list [owner]="profile.username"></app-video-list> -->
+  </div>
+</div>

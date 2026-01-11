@@ -149,12 +149,14 @@ $border-color: #303030;
   font-size: 16px;
   font-weight: 500;
   margin: 0 0 4px 0;
+  text-decoration: none;
 }
 
 .channel-username {
   color: $text-secondary;
   font-size: 13px;
   margin: 0;
+  text-decoration: none;
 }
 
 // Description
@@ -185,6 +187,12 @@ $border-color: #303030;
     font-weight: 500;
     margin: 0 0 24px 0;
   }
+}
+
+.comments-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .comments-placeholder {

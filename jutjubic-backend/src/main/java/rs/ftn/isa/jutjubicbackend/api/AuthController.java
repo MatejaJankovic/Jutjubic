@@ -83,7 +83,7 @@ public class AuthController {
                                                HttpServletRequest httpRequest) {
         String ipAddress = getClientIpAddress(httpRequest);
 
-        // Check rate limit
+
         if (rateLimiterService.isBlocked(ipAddress)) {
             long secondsUntilReset = rateLimiterService.getSecondsUntilReset(ipAddress);
             throw new RateLimitExceededException(
@@ -94,11 +94,11 @@ public class AuthController {
 
         try {
             AuthResponse response = authService.login(request);
-            // Reset rate limit on successful login
+
             rateLimiterService.resetAttempts(ipAddress);
             return ResponseEntity.ok(response);
         } catch (BadRequestException e) {
-            // Record failed attempt
+
             rateLimiterService.recordFailedAttempt(ipAddress);
             int remaining = rateLimiterService.getRemainingAttempts(ipAddress);
             throw new BadRequestException(e.getMessage() + " Preostalo pokušaja: " + remaining);

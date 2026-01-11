@@ -159,7 +159,7 @@ $border-color: #303030;
   font-size: 12px;
   margin: 0 0 2px 0;
   transition: color 0.2s ease;
-
+  text-decoration: none;
   &:hover {
     color: $text-primary;
   }

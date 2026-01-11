@@ -19,7 +19,7 @@
   } @else {
     <div class="watch-content">
       <div class="video-section">
-        <!-- Video Player -->
+
         <div class="video-player">
           <video
             *ngIf="video?.videoUrl"
@@ -48,7 +48,7 @@
               <span class="date">{{ formatRelativeTime(video.createdAt) }}</span>
             </div>
             <div class="stats-right">
-              <button class="action-btn">
+              <button class="action-btn" (click)="handleLikeClick()">
                 <svg viewBox="0 0 24 24" width="24" height="24">
                   <path fill="currentColor" d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
                 </svg>
@@ -66,8 +66,12 @@
           <div class="channel-info">
             <div class="channel-avatar">{{ getChannelInitials() }}</div>
             <div class="channel-details">
-              <h3 class="channel-name">{{ video.userFirstName }} {{ video.userLastName }}</h3>
-              <p class="channel-username">&#64;{{ video.username }}</p>
+              <a class="channel-name" [routerLink]="['/users', video.username]">
+                {{ video.userFirstName }} {{ video.userLastName }}
+              </a>
+              <a class="channel-username" [routerLink]="['/users', video.username]">
+                &#64;{{ video.username }}
+              </a>
             </div>
           </div>
 
@@ -78,19 +82,30 @@
           }
         </div>
 
-        <!-- Comments Section (Placeholder) -->
+
         <div class="comments-section">
-          <h3>{{ formatViewCount(video.commentCount) }} komentara</h3>
-          <div class="comments-placeholder">
-            <svg viewBox="0 0 24 24" width="48" height="48">
-              <path fill="currentColor" d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/>
-            </svg>
-            <p>Komentarisanje će uskoro biti dostupno</p>
-          </div>
+
+
+          <ng-container *ngIf="videoId; else commentsPlaceholder">
+            <div class="comments-shell">
+              <app-comment-form [videoId]="videoId!" (posted)="onCommentPosted()"></app-comment-form>
+              <app-comment-list [videoId]="videoId!" [refreshToken]="commentRefreshToken"></app-comment-list>
+            </div>
+          </ng-container>
+
+          <ng-template #commentsPlaceholder>
+            <div class="comments-placeholder">
+              <svg viewBox="0 0 24 24" width="48" height="48">
+                <path fill="currentColor" d="M21 6h-2v9H5v2c0 1.1.9 2 2 2h12l4 4V8c0-1.1-.9-2-2-2z"/>
+              </svg>
+              <p>Komentarisanje će uskoro biti dostupno</p>
+            </div>
+          </ng-template>
         </div>
+
       </div>
 
-      <!-- Sidebar with suggested videos (Placeholder) -->
+
       <aside class="sidebar-section">
         <h3>Preporučeni video snimci</h3>
         <div class="suggested-placeholder">
