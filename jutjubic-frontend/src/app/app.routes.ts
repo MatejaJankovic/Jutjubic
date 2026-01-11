@@ -6,7 +6,7 @@ import { RegisterComponent } from './components/register/register.component';
 import { ActivateComponent } from './components/activate/activate.component';
 import { WatchComponent } from './components/watch/watch.component';
 import { TrendingComponent } from './components/trending/trending.component';
-import { guestGuard } from './guards/auth.guard';
+import { authGuard,guestGuard } from './guards/auth.guard';
 import { CreateVideoComponent } from './components/createVideo/createVideo.component';
 import { ProfileComponent } from './components/profile/profile.component'
 
@@ -21,7 +21,8 @@ export const routes: Routes = [
       },
       {
         path: 'create-video',
-        component: CreateVideoComponent
+        component: CreateVideoComponent,
+        canActivate: [authGuard]
       },
       {
         path: 'watch/:id',

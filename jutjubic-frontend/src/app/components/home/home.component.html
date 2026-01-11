@@ -48,7 +48,12 @@
           </div>
           <div class="video-details">
             <h3 class="video-title">{{ video.title }}</h3>
-            <p class="channel-name">{{ video.userFirstName }} {{ video.userLastName }}</p>
+            <a
+              class="channel-name"
+              [routerLink]="['/users', video.username]"
+              (click)="$event.stopPropagation()">
+              {{ video.userFirstName }} {{ video.userLastName }}
+            </a>
             <p class="video-meta">
               <span>{{ formatViewCount(video.viewCount) }} pregleda</span>
               <span class="separator">•</span>

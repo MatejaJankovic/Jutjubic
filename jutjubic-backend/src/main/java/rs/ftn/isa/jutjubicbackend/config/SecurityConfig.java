@@ -41,10 +41,15 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/ping").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/videos/*/view").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/videos/*/comments").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/videos/**").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/videos/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/likes/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/likes/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/likes/**").authenticated()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll() // <-- ključno
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()

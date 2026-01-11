@@ -8,6 +8,7 @@ import { Subscription, filter, distinctUntilChanged, map, of, switchMap, tap } f
 import { CommentFormComponent } from '../comments/comment-form.component';
 import { CommentListComponent } from '../comments/comment-list.component';
 import { environment } from '../../env/environment';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-watch',
@@ -27,7 +28,8 @@ export class WatchComponent implements OnInit, OnDestroy {
   commentRefreshToken = 0;
   constructor(
     private route: ActivatedRoute,
-    private videoService: VideoService
+    private videoService: VideoService,
+    private authService: AuthService
   ) {
     const nav = history.state;
     if (nav?.video) {
@@ -112,5 +114,11 @@ export class WatchComponent implements OnInit, OnDestroy {
       },
       error: () => console.log("View count failed")
     });
+  }
+  handleLikeClick(): void {
+    if (!this.authService.isAuthenticated()) {
+      alert('You must log in to use this feature.');
+      return;
+    }
   }
 }

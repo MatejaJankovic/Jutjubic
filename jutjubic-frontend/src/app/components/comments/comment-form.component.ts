@@ -9,7 +9,7 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div *ngIf="authService.isAuthenticated()" class="comment-form">
+    <div *ngIf="authService.isAuthenticated(); else loginPrompt" class="comment-form">
       <textarea
         [(ngModel)]="text"
         rows="3"
@@ -21,6 +21,16 @@ import { AuthService } from '../../services/auth.service';
         </button>
       </div>
     </div>
+    <ng-template #loginPrompt>
+      <div class="comment-form login-prompt">
+        <p class="login-message">Prijavite se da biste komentarisali.</p>
+        <div class="actions">
+          <button class="post-button" type="button" (click)="notifyLoginRequired()">
+            Postavi komentar
+          </button>
+        </div>
+      </div>
+    </ng-template>
 
   `,
   styles: [`
@@ -65,7 +75,11 @@ import { AuthService } from '../../services/auth.service';
       cursor: not-allowed;
     }
     .post-button:not(:disabled):hover { transform: translateY(-1px); }
-
+    .login-message {
+      margin: 0 0 12px;
+      color: #cfcfcf;
+      font-size: 14px;
+    }
   `]
 })
 export class CommentFormComponent {
@@ -78,6 +92,10 @@ export class CommentFormComponent {
   constructor(public authService: AuthService, private commentsService: CommentsService) {}
 
   submit() {
+    if (!this.authService.isAuthenticated()) {
+      this.notifyLoginRequired();
+      return;
+    }
     if (!this.text.trim() || !this.videoId) return;
     this.submitting = true;
     this.commentsService.postComment(this.videoId, this.text.trim()).subscribe({
@@ -88,8 +106,13 @@ export class CommentFormComponent {
       },
       error: () => {
         this.submitting = false;
-        alert('Authentication required or error posting comment');
+        alert('Morate biti ulogovani kako biste koristili ovo.');
       },
     });
+  }
+
+
+  notifyLoginRequired() {
+    alert('Morate biti ulogovani kako biste koristili ovo.');
   }
 }
