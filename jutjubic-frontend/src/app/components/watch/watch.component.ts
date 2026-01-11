@@ -6,6 +6,7 @@ import { Video } from '../../models/video.model';
 import { Subscription } from 'rxjs';
 import { CommentFormComponent } from '../comments/comment-form.component';
 import { CommentListComponent } from '../comments/comment-list.component';
+import { environment } from '../../env/environment';
 
 @Component({
   selector: 'app-watch',
@@ -17,20 +18,32 @@ import { CommentListComponent } from '../comments/comment-list.component';
 })
 export class WatchComponent implements OnInit, OnDestroy {
   video: Video | null = null;
-  loading = true;
   error = false;
+  loading = false;
+  environment = environment;
+  private viewCountIncremented = false;
   private subscription = new Subscription();
 
   constructor(
     private route: ActivatedRoute,
     private videoService: VideoService
-  ) {}
+  ) {
+    const nav = history.state;
+      if (nav?.video) {
+        this.video = nav.video;
+      }
+    }
 
   ngOnInit(): void {
     this.subscription.add(
       this.route.params.subscribe(params => {
         const id = +params['id'];
-        if (id) {
+        if (!id) return;
+
+        if (this.video) {
+          this.incrementViews(id);
+        }
+        else {
           this.loadVideo(id);
         }
       })
@@ -43,22 +56,20 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   loadVideo(id: number): void {
     this.loading = true;
-    this.error = false;
 
-    this.subscription.add(
-      this.videoService.getVideoById(id).subscribe({
-        next: (video) => {
-          this.video = video;
-          this.loading = false;
-          // Increment view count
-          this.videoService.incrementViewCount(id).subscribe();
-        },
-        error: () => {
-          this.error = true;
-          this.loading = false;
-        }
-      })
-    );
+    this.videoService.getVideoById(id).subscribe({
+      next: (v) => {
+        this.video = v;
+        this.error = false;
+        this.loading = false;
+
+        this.incrementViews(id);
+      },
+      error: () => {
+        this.error = true;
+        this.loading = false;
+      }
+    });
   }
 
   formatViewCount(count: number): string {
@@ -73,17 +84,29 @@ export class WatchComponent implements OnInit, OnDestroy {
     if (!this.video) return '';
     return (this.video.userFirstName?.charAt(0) || '') + (this.video.userLastName?.charAt(0) || '');
   }
-  // Add a small getter so template can use videoId safely
+
   get videoId(): number | undefined {
     return this.video?.id;
   }
 
-  // Called by comment form when a new comment is posted
-  onCommentPosted(): void {
+ onCommentPosted(): void {
     if (this.video) {
       this.video.commentCount = (this.video.commentCount || 0) + 1;
     }
-    // Optionally reload comments if your comment list does not auto-refresh
-    // e.g. this.commentList?.reload();
+
+  }
+
+  incrementViews(id: number) {
+    if (this.viewCountIncremented) return;
+    this.viewCountIncremented = true;
+
+    this.videoService.incrementViewCount(id).subscribe({
+      next: (updated) => {
+        if (this.video) {
+          this.video.viewCount = updated.viewCount;
+        }
+      },
+      error: () => console.log("View count failed")
+    });
   }
 }

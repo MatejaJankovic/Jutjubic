@@ -7,9 +7,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import rs.ftn.isa.jutjubicbackend.model.User;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 
 @Component
 public class JwtTokenProvider {
@@ -21,26 +25,23 @@ public class JwtTokenProvider {
     private long jwtExpiration;
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(java.util.Base64.getEncoder().encodeToString(jwtSecret.getBytes()));
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(Authentication authentication) {
-        //UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        rs.ftn.isa.jutjubicbackend.model.User user = (rs.ftn.isa.jutjubicbackend.model.User) authentication.getPrincipal(); // CHANGED
-
-        //return generateToken(userDetails.getUsername());
-        return generateToken(user.getEmail()); // CHANGED
+        User user = (User) authentication.getPrincipal();
+        return generateToken(user.getEmail());
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String email) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
 
         return Jwts.builder()
-                .subject(username)
-                .issuedAt(now)
-                .expiration(expiryDate)
+                .setSubject(email)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
                 .signWith(getSigningKey())
                 .compact();
     }

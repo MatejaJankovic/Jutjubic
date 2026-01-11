@@ -21,21 +21,22 @@
       <div class="video-section">
         <!-- Video Player -->
         <div class="video-player">
-          @if (video.videoUrl) {
-            <video controls autoplay [poster]="video.thumbnailUrl">
-              <source [src]="video.videoUrl" type="video/mp4">
-              Vaš browser ne podržava video tag.
-            </video>
-          } @else {
-            <div class="video-placeholder">
-              <svg viewBox="0 0 24 24" width="80" height="80">
-                <path fill="currentColor" d="M8 5v14l11-7z"/>
-              </svg>
-              <p>Video će uskoro biti dostupan</p>
-            </div>
-          }
-        </div>
+          <video
+            *ngIf="video?.videoUrl"
+            controls
+            autoplay
+            preload="auto"
+            [src]="environment.apiUrl + video.videoUrl"
+            [poster]="video.thumbnailUrl ? environment.apiUrl + video.thumbnailUrl : ''">
+          </video>
 
+          <div *ngIf="!video.videoUrl" class="video-placeholder">
+            <svg viewBox="0 0 24 24" width="80" height="80">
+              <path fill="currentColor" d="M8 5v14l11-7z"/>
+            </svg>
+            <p>Video će uskoro biti dostupan</p>
+          </div>
+        </div>
         <!-- Video Info -->
         <div class="video-info">
           <h1 class="video-title">{{ video.title }}</h1>

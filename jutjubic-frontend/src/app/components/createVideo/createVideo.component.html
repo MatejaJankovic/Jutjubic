@@ -1,0 +1,40 @@
+<form (submit)="submit(); $event.preventDefault()" class="create-video-form">
+
+  <input type="text" placeholder="Naslov" [(ngModel)]="title" name="title" required />
+
+  <textarea placeholder="Opis" [(ngModel)]="description" name="description"></textarea>
+
+  <input type="text" placeholder="Tagovi (odvojeni zarezom)" [(ngModel)]="tags" name="tags" />
+
+  <label>Video (MP4 max 200MB)</label>
+  <input type="file" (change)="onVideoSelected($event)" accept="video/mp4" required />
+
+  <div *ngIf="videoName" class="file-info">
+    Izabrani video: {{ videoName }}
+  </div>
+
+
+  <label>Thumbnail</label>
+  <input type="file" (change)="onThumbnailSelected($event)" accept="image/*" />
+
+  <div *ngIf="thumbnailName" class="file-info">
+    Izabrana slika: {{ thumbnailName }}
+  </div>
+
+
+
+  <input type="text" placeholder="Lokacija (opciono)" [(ngModel)]="location" name="location" />
+
+  <button type="submit" [disabled]="uploading">
+    Postavi video
+  </button>
+
+  <div *ngIf="uploading" class="uploading-status">
+    Upload u toku...
+  </div>
+
+  <div *ngIf="errorMessage" class="error">
+    {{ errorMessage }}
+  </div>
+
+</form>

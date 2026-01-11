@@ -3,9 +3,11 @@ package rs.ftn.isa.jutjubicbackend.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import rs.ftn.isa.jutjubicbackend.model.Video;
 
 import java.util.List;
@@ -24,5 +26,11 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 
     @Query("SELECT v FROM Video v ORDER BY v.viewCount DESC")
     Page<Video> findTrending(Pageable pageable);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE Video v SET v.viewCount = v.viewCount + 1 WHERE v.id = :id")
+    int incrementViewCountById(@Param("id") Long id);
+
 }
 
