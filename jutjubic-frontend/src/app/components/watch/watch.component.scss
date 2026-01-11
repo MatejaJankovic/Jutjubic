@@ -187,6 +187,12 @@ $border-color: #303030;
   }
 }
 
+.comments-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .comments-placeholder {
   display: flex;
   flex-direction: column;

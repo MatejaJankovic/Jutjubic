@@ -83,8 +83,10 @@
 
           <!-- show comment UI only when videoId is available -->
           <ng-container *ngIf="videoId; else commentsPlaceholder">
-            <app-comment-form [videoId]="videoId!" (posted)="onCommentPosted()"></app-comment-form>
-            <app-comment-list [videoId]="videoId!" [refreshToken]="commentRefreshToken"></app-comment-list>
+            <div class="comments-shell">
+              <app-comment-form [videoId]="videoId!" (posted)="onCommentPosted()"></app-comment-form>
+              <app-comment-list [videoId]="videoId!" [refreshToken]="commentRefreshToken"></app-comment-list>
+            </div>
           </ng-container>
 
           <ng-template #commentsPlaceholder>
