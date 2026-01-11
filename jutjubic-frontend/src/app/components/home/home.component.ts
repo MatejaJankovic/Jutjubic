@@ -46,22 +46,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   onVideoClick(video: Video): void {
-    this.activeVideo = video;
-
-    // 🔥 Pozovi backend da poveća broj pregleda
-    this.videoService.incrementViewCount(video.id).subscribe({
-      next: () => {
-        // ✅ Optimistic update u listi na homepage-u
-        video.viewCount++;
-
-        // Ako želiš i u modalu odmah da se vidi update
-        if (this.activeVideo) {
-          this.activeVideo.viewCount++;
-        }
-      },
-      error: err => console.log("Greška pri povećanju pregleda", err)
-    });
+    this.router.navigate(
+      ['/watch', video.id],
+      { state: { video } }
+    );
   }
+
 
 
   closeVideoModal(): void {

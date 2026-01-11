@@ -66,5 +66,14 @@ public class VideoController {
         VideoDTO created = videoService.createVideo(request, video, thumbnail);
         return ResponseEntity.ok(created);
     }
+
+    @GetMapping("/{id}/thumbnail")
+    public ResponseEntity<byte[]> getThumbnail(@PathVariable Long id) throws Exception {
+        byte[] data = videoService.getThumbnail(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(data);
+    }
+
 }
 

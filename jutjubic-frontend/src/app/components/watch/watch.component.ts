@@ -18,19 +18,32 @@ export class WatchComponent implements OnInit, OnDestroy {
   error = false;
   loading = false;
   environment = environment;
+  private viewCountIncremented = false;
   private subscription = new Subscription();
 
   constructor(
     private route: ActivatedRoute,
     private videoService: VideoService
-  ) {}
+  ) {
+    const nav = history.state;
+      if (nav?.video) {
+        this.video = nav.video;
+      }
+    }
 
   ngOnInit(): void {
     this.subscription.add(
       this.route.params.subscribe(params => {
         const id = +params['id'];
-        if (id) this.loadVideo(id);
-        else this.error = true;
+        if (!id) return;
+
+        if (this.video) {
+          this.incrementViews(id);
+        }
+
+        else {
+          this.loadVideo(id);
+        }
       })
     );
   }
@@ -40,16 +53,19 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   loadVideo(id: number): void {
-    this.loading = true; // Dodaj loading flag ako želiš
+    this.loading = true;
+
     this.videoService.getVideoById(id).subscribe({
       next: (v) => {
         this.video = v;
         this.error = false;
-        // Opciono: pozovi view count
-        this.videoService.incrementViewCount(id).subscribe();
+        this.loading = false;
+
+        this.incrementViews(id);
       },
       error: () => {
         this.error = true;
+        this.loading = false;
       }
     });
   }
@@ -65,5 +81,19 @@ export class WatchComponent implements OnInit, OnDestroy {
   getChannelInitials(): string {
     if (!this.video) return '';
     return (this.video.userFirstName?.charAt(0) || '') + (this.video.userLastName?.charAt(0) || '');
+  }
+
+  incrementViews(id: number) {
+    if (this.viewCountIncremented) return;
+    this.viewCountIncremented = true;
+
+    this.videoService.incrementViewCount(id).subscribe({
+      next: (updated) => {
+        if (this.video) {
+          this.video.viewCount = updated.viewCount;
+        }
+      },
+      error: () => console.log("View count failed")
+    });
   }
 }

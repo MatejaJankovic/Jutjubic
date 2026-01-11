@@ -80,12 +80,9 @@ public class VideoService {
 
     @Transactional
     public Optional<VideoDTO> incrementViewCount(Long id) {
-        Optional<Video> videoOptional = videoRepository.findById(id);
-        if (videoOptional.isPresent()) {
-            Video video = videoOptional.get();
-            video.setViewCount(video.getViewCount() + 1);
-            videoRepository.save(video);
-            return Optional.of(VideoDTO.fromEntity(video));
+        int updatedRows = videoRepository.incrementViewCountById(id);
+        if (updatedRows > 0) {
+            return videoRepository.findById(id).map(VideoDTO::fromEntity);
         }
         return Optional.empty();
     }
@@ -125,6 +122,9 @@ public class VideoService {
 
         validateVideo(video);
 
+        Path videoPath = null;
+        Path thumbPath = null;
+
         try {
             Path base = Paths.get(uploadDir).toAbsolutePath().normalize();
             Path videoDir = base.resolve("videos");
@@ -136,11 +136,11 @@ public class VideoService {
             String videoName = UUID.randomUUID() + ".mp4";
             String thumbName = UUID.randomUUID() + ".jpg";
 
-            Path videoPath = videoDir.resolve(videoName);
-            Path thumbPath = thumbDir.resolve(thumbName);
+            videoPath = videoDir.resolve(videoName);
+            thumbPath = thumbDir.resolve(thumbName);
 
-            Files.copy(video.getInputStream(), videoPath);
-            Files.copy(thumbnail.getInputStream(), thumbPath);
+            uploadWithTimeout(video, videoPath);
+            uploadWithTimeout(thumbnail, thumbPath);
 
             Video videoEntity = Video.builder()
                     .title(request.getTitle())
@@ -161,8 +161,32 @@ public class VideoService {
             return VideoDTO.fromEntity(videoEntity);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Upload neuspešan — rollback transakcije");
+            try { if (videoPath != null) Files.deleteIfExists(videoPath); } catch (Exception ignored) {}
+            try { if (thumbPath != null) Files.deleteIfExists(thumbPath); } catch (Exception ignored) {}
+
+            throw new RuntimeException("Upload neuspešan — rollback", e);
+        }
+    }
+
+    private void uploadWithTimeout(MultipartFile file, Path target) throws Exception {
+        var executor = java.util.concurrent.Executors.newSingleThreadExecutor();
+
+        try {
+            var future = executor.submit(() -> {
+                try {
+                    Files.copy(file.getInputStream(), target);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return true;
+            });
+
+            future.get(120, java.util.concurrent.TimeUnit.SECONDS);
+
+        } catch (java.util.concurrent.TimeoutException e) {
+            throw new RuntimeException("Upload traje predugo");
+        } finally {
+            executor.shutdownNow();
         }
     }
 
@@ -180,8 +204,17 @@ public class VideoService {
     @Cacheable(value = "thumbnails", key = "#id")
     public byte[] getThumbnail(Long id) throws IOException {
         Video video = videoRepository.findById(id).orElseThrow();
-        return Files.readAllBytes(Paths.get(video.getThumbnailUrl()));
+
+        Path base = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Path thumbDir = base.resolve("thumbnails");
+
+        Path realPath = thumbDir.resolve(
+                Paths.get(video.getThumbnailUrl()).getFileName().toString()
+        );
+
+        return Files.readAllBytes(realPath);
     }
+
 
 }
 

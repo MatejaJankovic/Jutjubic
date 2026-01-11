@@ -22,11 +22,13 @@
         <!-- Video Player -->
         <div class="video-player">
 
-          <video *ngIf="video.videoUrl"
-                 controls
-                 autoplay
-                 [src]="environment.apiUrl + video.videoUrl"
-                 [poster]="video.thumbnailUrl ? environment.apiUrl + video.thumbnailUrl : ''">
+          <video
+            *ngIf="video?.videoUrl"
+            controls
+            autoplay
+            preload="auto"
+            [src]="environment.apiUrl + video.videoUrl"
+            [poster]="video.thumbnailUrl ? environment.apiUrl + video.thumbnailUrl : ''">
           </video>
 
           <div *ngIf="!video.videoUrl" class="video-placeholder">

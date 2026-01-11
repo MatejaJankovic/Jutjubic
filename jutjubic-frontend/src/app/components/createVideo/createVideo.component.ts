@@ -33,9 +33,35 @@ export class CreateVideoComponent {
   thumbnailName: string = '';
 
   onVideoSelected(event: any) {
-    this.videoFile = event.target.files[0];
-    this.videoName = this.videoFile ? this.videoFile.name : '';
+    const file: File = event.target.files[0];
+
+    if (!file) {
+      this.videoFile = null;
+      this.videoName = '';
+      return;
+    }
+
+    const maxSize = 200 * 1024 * 1024; // 200MB
+    if (file.size > maxSize) {
+      this.errorMessage = 'Video ne sme biti veći od 200MB';
+      this.videoFile = null;
+      this.videoName = '';
+      return;
+    }
+
+    // Provera tipa
+    if (file.type !== 'video/mp4') {
+      this.errorMessage = 'Dozvoljen je samo mp4 format';
+      this.videoFile = null;
+      this.videoName = '';
+      return;
+    }
+
+    this.videoFile = file;
+    this.videoName = file.name;
+    this.errorMessage = '';
   }
+
 
   onThumbnailSelected(event: any) {
     this.thumbnailFile = event.target.files[0];
@@ -44,10 +70,10 @@ export class CreateVideoComponent {
 
 
   submit() {
-    if (!this.title || !this.description || !this.videoFile) {
-      this.errorMessage = 'Molimo popunite obavezna polja.';
-      return;
-    }
+    if (!this.title || !this.description || !this.videoFile || !this.thumbnailFile) {
+        this.errorMessage = 'Naslov, opis, video i thumbnail su obavezni.';
+        return;
+      }
 
     const meta = {
       title: this.title,
@@ -60,13 +86,10 @@ export class CreateVideoComponent {
     formData.append('data', JSON.stringify(meta));
     formData.append('video', this.videoFile);
 
-    if (this.thumbnailFile) {
-      formData.append('thumbnail', this.thumbnailFile);
-    }
+    formData.append('thumbnail', this.thumbnailFile!);
 
     const token = this.authService.getToken();
 
-    // === DEBUG ===
     console.log('Token:', token);
     console.log('FormData entries:');
     formData.forEach((value, key) => {
@@ -77,7 +100,6 @@ export class CreateVideoComponent {
       this.errorMessage = 'Nema tokena, prijavite se ponovo.';
       return;
     }
-    // === END DEBUG ===
 
     this.uploading = true;
 
@@ -85,13 +107,22 @@ export class CreateVideoComponent {
       next: (video) => {
         this.uploading = false;
         console.log('Upload uspeo:', video);
-        this.router.navigate(['/watch', video.id]); // ide na stranu za gledanje videa
+        this.router.navigate(['']);
       },
       error: (err) => {
         this.uploading = false;
-        this.errorMessage = 'Došlo je do greške prilikom upload-a.';
+
+        if (err.error && err.error.message) {
+          this.errorMessage = err.error.message;
+        } else if (err.status === 0) {
+          this.errorMessage = 'Upload nije uspeo. Proveri veličinu fajla (max 200MB) ili konekciju.';
+        } else {
+          this.errorMessage = err.error ? err.error : 'Došlo je do greške prilikom upload-a.';
+        }
+
         console.error('Upload error:', err);
       }
+
     });
   }
 }
