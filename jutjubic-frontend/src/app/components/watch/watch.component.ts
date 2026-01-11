@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { VideoService } from '../../services/video.service';
@@ -17,6 +18,7 @@ import { environment } from '../../env/environment';
   styleUrls: ['./watch.component.scss'],
 })
 export class WatchComponent implements OnInit, OnDestroy {
+  private commentListRef?: CommentListComponent;
   video: Video | null = null;
   error = false;
   loading = false;
@@ -29,10 +31,19 @@ export class WatchComponent implements OnInit, OnDestroy {
     private videoService: VideoService
   ) {
     const nav = history.state;
-      if (nav?.video) {
-        this.video = nav.video;
-      }
+    if (nav?.video) {
+      this.video = nav.video;
     }
+  }
+
+  @ViewChild(CommentListComponent)
+  set commentList(component: CommentListComponent | undefined) {
+    this.commentListRef = component;
+    if (component && this.videoId) {
+      component.resetAndLoad();
+    }
+  }
+
 
   ngOnInit(): void {
     this.subscription.add(
@@ -93,7 +104,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     if (this.video) {
       this.video.commentCount = (this.video.commentCount || 0) + 1;
     }
-
+   this.commentList?.resetAndLoad();
   }
 
   incrementViews(id: number) {

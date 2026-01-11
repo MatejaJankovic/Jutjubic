@@ -9,20 +9,18 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div *ngIf="authService.isAuthenticated(); else authRequired" class="comment-form">
+    <div *ngIf="authService.isAuthenticated()" class="comment-form">
       <textarea [(ngModel)]="text" rows="3" placeholder="Write a comment..." maxlength="2000"></textarea>
       <div class="actions">
         <button (click)="submit()" [disabled]="!text.trim() || submitting">Post comment</button>
       </div>
     </div>
-    <ng-template #authRequired>
-      <div class="auth-required">Authentication required</div>
-    </ng-template>
+
   `,
   styles: [`
     .comment-form textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
     .actions { margin-top: 0.5rem; text-align: right; }
-    .auth-required { color: #c00; font-weight: 600; }
+
   `]
 })
 export class CommentFormComponent {

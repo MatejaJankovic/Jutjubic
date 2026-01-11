@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CommentsService } from '../../services/comments.service';
 import { Comment } from '../../models/comment.model';
@@ -30,7 +30,7 @@ import {RouterLink} from '@angular/router';
     .load-more { margin-top: 0.5rem; }
   `]
 })
-export class CommentListComponent {
+export class CommentListComponent implements OnInit, OnChanges {
   @Input() videoId!: number;
 
   comments: Comment[] = [];
@@ -44,8 +44,15 @@ export class CommentListComponent {
 
   constructor(private commentsService: CommentsService) {}
 
+  ngOnInit(): void {
+    if (this.videoId) {
+      this.resetAndLoad();
+    }
+  }
   ngOnChanges(): void {
-    this.resetAndLoad();
+    if (this.videoId) {
+      this.resetAndLoad();
+    }
   }
 
   resetAndLoad() {
