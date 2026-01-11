@@ -3,13 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Comment } from '../models/comment.model';
 import { map } from 'rxjs/operators';
-
+import { environment } from '../env/environment';
 @Injectable({
   providedIn: 'root',
 })
 export class CommentsService {
-  private readonly API = 'http://localhost:8080/api';
 
+  private readonly API = `${environment.apiUrl}/api`;
   constructor(private http: HttpClient) {}
 
   getComments(videoId: number, page = 0, size = 10): Observable<{comments: Comment[]; total: number}> {
