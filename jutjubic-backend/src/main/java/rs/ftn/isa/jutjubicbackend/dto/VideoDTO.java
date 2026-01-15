@@ -1,5 +1,6 @@
 package rs.ftn.isa.jutjubicbackend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +29,17 @@ public class VideoDTO {
     private String userFirstName;
     private String userLastName;
     private LocalDateTime createdAt;
+    private boolean likedByCurrentUser;
+
+    @JsonProperty("isLikedByCurrentUser")
+    public boolean isLikedByCurrentUser() {
+        return likedByCurrentUser;
+    }
+
+    @JsonProperty("isLikedByCurrentUser")
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+        this.likedByCurrentUser = likedByCurrentUser;
+    }
 
     public static VideoDTO fromEntity(Video video) {
         return VideoDTO.builder()

@@ -1,4 +1,3 @@
-// java
 package rs.ftn.isa.jutjubicbackend.service;
 
 import lombok.RequiredArgsConstructor;
@@ -40,7 +39,7 @@ public class CommentService {
         comment.setCreatedAt(Instant.now());
         Comment saved = commentRepository.save(comment);
 
-        // Increment video's comment count if video exists
+        // Inkrementiraj broj komentara na videu
         Optional<Video> vOpt = videoRepository.findById(videoId);
         vOpt.ifPresent(video -> {
             Long current = video.getCommentCount() == null ? 0L : video.getCommentCount();

@@ -1,7 +1,10 @@
+@use 'sass:color';
+
 $bg-primary: #0f0f0f;
 $bg-secondary: #181818;
 $bg-card: #212121;
 $bg-hover: #383838;
+$bg-hover-light: #424242;
 $navbar-bg: #202020;
 $sidebar-bg: #0f0f0f;
 $text-primary: #ffffff;
@@ -141,7 +144,7 @@ $border-color: #303030;
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: lighten($bg-hover, 5%);
+    background-color: $bg-hover-light;
   }
 }
 

@@ -40,6 +40,16 @@ public class VideoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/{id}/like")
+    public ResponseEntity<VideoDTO> toggleLike(@PathVariable Long id) {
+        try {
+            VideoDTO video = videoService.toggleLike(id);
+            return ResponseEntity.ok(video);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @GetMapping("/search")
     public ResponseEntity<VideoPageResponse> searchVideos(
             @RequestParam String query,

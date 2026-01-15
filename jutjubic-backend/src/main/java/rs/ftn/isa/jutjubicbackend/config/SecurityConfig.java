@@ -33,11 +33,13 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.disable());
 
-        http.cors(cors -> {});   // <-- uključi CORS bez deprecated API-ja
+        http.cors(cors -> {});   // uključi CORS bez deprecated API-ja
 
         http.sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         );
+
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/ping").permitAll()
@@ -56,10 +58,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
         );
 
-
-
         http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

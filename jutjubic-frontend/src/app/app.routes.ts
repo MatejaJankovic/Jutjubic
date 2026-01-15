@@ -17,7 +17,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: HomeComponent,
+        component: HomeComponent
       },
       {
         path: 'create-video',

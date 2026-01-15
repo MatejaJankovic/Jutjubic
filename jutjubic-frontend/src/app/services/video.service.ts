@@ -26,6 +26,10 @@ export class VideoService {
     return this.http.post<Video>(`${this.API_URL}/${id}/view`, {});
   }
 
+  toggleLike(id: number): Observable<Video> {
+    return this.http.post<Video>(`${this.API_URL}/${id}/like`, {});
+  }
+
   searchVideos(query: string, page: number = 0, size: number = 12): Observable<VideoPageResponse> {
     const params = new HttpParams()
       .set('query', query)

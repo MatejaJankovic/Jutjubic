@@ -65,24 +65,6 @@
     }
   </div>
 
-  <!-- Loading Skeleton -->
-  @if (loading) {
-    <div class="video-grid skeleton-grid">
-      @for (i of [1,2,3,4,5,6,7,8]; track i) {
-        <div class="video-card skeleton">
-          <div class="thumbnail-container skeleton-thumbnail"></div>
-          <div class="video-info">
-            <div class="channel-avatar skeleton-avatar"></div>
-            <div class="video-details">
-              <div class="skeleton-title"></div>
-              <div class="skeleton-meta"></div>
-              <div class="skeleton-meta short"></div>
-            </div>
-          </div>
-        </div>
-      }
-    </div>
-  }
 
   <!-- Empty State -->
   @if (!loading && videos.length === 0) {

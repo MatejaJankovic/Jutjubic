@@ -13,6 +13,7 @@ export interface Video {
   userFirstName: string;
   userLastName: string;
   createdAt: string;
+  isLikedByCurrentUser?: boolean;
 }
 
 export interface VideoPageResponse {

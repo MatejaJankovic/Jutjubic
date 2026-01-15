@@ -25,38 +25,9 @@ public class SwaggerAutoOpenConfig implements ApplicationListener<ApplicationRea
         printSwaggerBanner(swaggerUrl, apiDocsUrl);
     }
 
-    private void printSwaggerBanner(String swaggerUrl, String apiDocsUrl) {
-        String banner = """
-                
-                ╔════════════════════════════════════════════════════════════════════════════╗
-                ║                                                                            ║
-                ║  🎬  JUTJUBIĆ BACKEND - USPEŠNO POKRENUT!  🎬                             ║
-                ║                                                                            ║
-                ╠════════════════════════════════════════════════════════════════════════════╣
-                ║                                                                            ║
-                ║  📚 Swagger UI:                                                            ║
-                ║     %s                                  ║
-                ║                                                                            ║
-                ║  📄 API Docs (JSON):                                                       ║
-                ║     %s                                      ║
-                ║                                                                            ║
-                ║  🔌 Backend API:                                                           ║
-                ║     http://localhost:%s                                             ║
-                ║                                                                            ║
-                ╠════════════════════════════════════════════════════════════════════════════╣
-                ║                                                                            ║
-                ║  💡 Saveti:                                                                ║
-                ║     • Kopiraj Swagger UI link i otvori u browser-u                        ║
-                ║     • Koristi "Authorize" dugme za JWT autentifikaciju                    ║
-                ║     • Testiraj endpoint-e direktno iz Swagger UI-a                        ║
-                ║                                                                            ║
-                ╚════════════════════════════════════════════════════════════════════════════╝
-                
-                """.formatted(swaggerUrl, apiDocsUrl, serverPort);
-
-        System.out.println(banner);
-        log.info("🚀 Aplikacija je spremna za korišćenje!");
-        log.info("📖 Swagger UI: {}", swaggerUrl);
+    private void printSwaggerBanner(String swaggerUrl, String apiDocsUrl) {;
+        log.info("Aplikacija je spremna za korišćenje!");
+        log.info("Swagger UI: {}", swaggerUrl);
     }
 }
 

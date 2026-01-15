@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 $bg-primary: #0f0f0f;
 $bg-secondary: #181818;
 $bg-card: #212121;
@@ -175,63 +177,6 @@ $border-color: #303030;
   }
 }
 
-// Loading Skeleton
-.skeleton-grid {
-  margin-top: 24px;
-}
-
-.skeleton {
-  pointer-events: none;
-}
-
-.skeleton-thumbnail {
-  background: linear-gradient(90deg, $bg-card 0%, lighten($bg-card, 5%) 50%, $bg-card 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  height: 100%;
-}
-
-.skeleton-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(90deg, $bg-card 0%, lighten($bg-card, 5%) 50%, $bg-card 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-.skeleton-title {
-  height: 14px;
-  width: 100%;
-  margin-bottom: 8px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, $bg-card 0%, lighten($bg-card, 5%) 50%, $bg-card 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-.skeleton-meta {
-  height: 12px;
-  width: 70%;
-  margin-bottom: 4px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, $bg-card 0%, lighten($bg-card, 5%) 50%, $bg-card 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-
-  &.short {
-    width: 50%;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
 
 // Empty State
 .empty-state {

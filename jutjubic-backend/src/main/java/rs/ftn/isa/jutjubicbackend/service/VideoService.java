@@ -16,7 +16,9 @@ import rs.ftn.isa.jutjubicbackend.dto.VideoDTO;
 import rs.ftn.isa.jutjubicbackend.dto.VideoPageResponse;
 import rs.ftn.isa.jutjubicbackend.model.User;
 import rs.ftn.isa.jutjubicbackend.model.Video;
+import rs.ftn.isa.jutjubicbackend.model.VideoLike;
 import rs.ftn.isa.jutjubicbackend.repository.UserRepository;
+import rs.ftn.isa.jutjubicbackend.repository.VideoLikeRepository;
 import rs.ftn.isa.jutjubicbackend.repository.VideoRepository;
 
 import java.io.IOException;
@@ -32,6 +34,7 @@ import java.util.UUID;
 public class VideoService {
 
     private final VideoRepository videoRepository;
+    private final VideoLikeRepository videoLikeRepository;
     @Autowired
     private UserRepository userRepository;
 
@@ -60,12 +63,45 @@ public class VideoService {
                 .orElseThrow(() -> new RuntimeException("Trenutni korisnik nije pronađen"));
     }
 
+    private User getCurrentUserOrNull() {
+        try {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                return null;
+            }
+
+            Object principal = auth.getPrincipal();
+            String email;
+
+            if (principal instanceof User u) {
+                email = u.getEmail();
+            } else {
+                email = auth.getName();
+            }
+
+            return userRepository.findByEmail(email).orElse(null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private VideoDTO toVideoDTO(Video video) {
+        VideoDTO dto = VideoDTO.fromEntity(video);
+        User currentUser = getCurrentUserOrNull();
+        if (currentUser != null) {
+            dto.setLikedByCurrentUser(
+                videoLikeRepository.existsByVideoIdAndUserId(video.getId(), currentUser.getId())
+            );
+        }
+        return dto;
+    }
+
     public VideoPageResponse getAllVideos(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Video> videoPage = videoRepository.findAllByOrderByCreatedAtDesc(pageable);
 
         return VideoPageResponse.builder()
-                .videos(videoPage.getContent().stream().map(VideoDTO::fromEntity).toList())
+                .videos(videoPage.getContent().stream().map(this::toVideoDTO).toList())
                 .currentPage(videoPage.getNumber())
                 .totalPages(videoPage.getTotalPages())
                 .totalElements(videoPage.getTotalElements())
@@ -75,16 +111,44 @@ public class VideoService {
     }
 
     public Optional<VideoDTO> getVideoById(Long id) {
-        return videoRepository.findById(id).map(VideoDTO::fromEntity);
+        return videoRepository.findById(id).map(this::toVideoDTO);
     }
 
     @Transactional
     public Optional<VideoDTO> incrementViewCount(Long id) {
         int updatedRows = videoRepository.incrementViewCountById(id);
         if (updatedRows > 0) {
-            return videoRepository.findById(id).map(VideoDTO::fromEntity);
+            return videoRepository.findById(id).map(this::toVideoDTO);
         }
         return Optional.empty();
+    }
+
+    @Transactional
+    public VideoDTO toggleLike(Long videoId) {
+        User currentUser = getCurrentUser();
+        Video video = videoRepository.findById(videoId)
+                .orElseThrow(() -> new RuntimeException("Video nije pronađen"));
+
+        boolean alreadyLiked = videoLikeRepository.existsByVideoIdAndUserId(videoId, currentUser.getId());
+
+        if (alreadyLiked) {
+            // Unlike
+            videoLikeRepository.deleteByVideoIdAndUserId(videoId, currentUser.getId());
+            videoRepository.decrementLikeCountById(videoId);
+        } else {
+            // Like
+            VideoLike like = VideoLike.builder()
+                    .video(video)
+                    .user(currentUser)
+                    .build();
+            videoLikeRepository.save(like);
+            videoRepository.incrementLikeCountById(videoId);
+        }
+
+        // Refresh and return updated video
+        return videoRepository.findById(videoId)
+                .map(this::toVideoDTO)
+                .orElseThrow(() -> new RuntimeException("Video nije pronađen"));
     }
 
     public VideoPageResponse searchVideos(String query, int page, int size) {
@@ -92,7 +156,7 @@ public class VideoService {
         Page<Video> videoPage = videoRepository.searchByTitle(query, pageable);
 
         return VideoPageResponse.builder()
-                .videos(videoPage.getContent().stream().map(VideoDTO::fromEntity).toList())
+                .videos(videoPage.getContent().stream().map(this::toVideoDTO).toList())
                 .currentPage(videoPage.getNumber())
                 .totalPages(videoPage.getTotalPages())
                 .totalElements(videoPage.getTotalElements())
@@ -106,7 +170,7 @@ public class VideoService {
         Page<Video> videoPage = videoRepository.findTrending(pageable);
 
         return VideoPageResponse.builder()
-                .videos(videoPage.getContent().stream().map(VideoDTO::fromEntity).toList())
+                .videos(videoPage.getContent().stream().map(this::toVideoDTO).toList())
                 .currentPage(videoPage.getNumber())
                 .totalPages(videoPage.getTotalPages())
                 .totalElements(videoPage.getTotalElements())

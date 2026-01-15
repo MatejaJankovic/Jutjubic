@@ -1,14 +1,15 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { Video, VideoPageResponse } from '../../models/video.model';
 import { Subscription } from 'rxjs';
+import { environment } from '../../env/environment';
 
 @Component({
   selector: 'app-trending',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './trending.component.html',
   styleUrls: ['./trending.component.scss'],
 })
@@ -18,19 +19,29 @@ export class TrendingComponent implements OnInit, OnDestroy {
   currentPage = 0;
   totalPages = 0;
   hasNext = false;
+  environment = environment;
   private subscription = new Subscription();
 
   constructor(
     private videoService: VideoService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    // Odmah učitaj videe
     this.loadVideos();
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  private refreshVideos(): void {
+    this.currentPage = 0;
+    this.videos = [];
+    this.loading = false;
+    this.loadVideos();
   }
 
   loadVideos(): void {
@@ -44,9 +55,11 @@ export class TrendingComponent implements OnInit, OnDestroy {
           this.totalPages = response.totalPages;
           this.hasNext = response.hasNext;
           this.loading = false;
+          this.cdr.detectChanges(); // Prisili Angular da osveži UI
         },
         error: () => {
           this.loading = false;
+          this.cdr.detectChanges();
         }
       })
     );
@@ -69,7 +82,7 @@ export class TrendingComponent implements OnInit, OnDestroy {
   }
 
   onVideoClick(video: Video): void {
-    this.router.navigate(['/watch', video.id]);
+    this.router.navigate(['/watch', video.id], { state: { video } });
   }
 
   formatDuration(seconds: number): string {

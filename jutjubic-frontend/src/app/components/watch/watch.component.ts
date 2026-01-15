@@ -106,13 +106,25 @@ export class WatchComponent implements OnInit, OnDestroy {
     if (this.viewCountIncremented) return;
     this.viewCountIncremented = true;
 
+    // Optimistic UI update - odmah inkrementiraj broj pregleda
+    if (this.video) {
+      this.video.viewCount = this.video.viewCount + 1;
+    }
+
     this.videoService.incrementViewCount(id).subscribe({
       next: (updated) => {
+        // Ažuriraj sa tačnim brojem sa servera
         if (this.video) {
           this.video.viewCount = updated.viewCount;
         }
       },
-      error: () => console.log("View count failed")
+      error: () => {
+        console.log("View count failed");
+        // Vrati na prethodno stanje ako je došlo do greške
+        if (this.video) {
+          this.video.viewCount = this.video.viewCount - 1;
+        }
+      }
     });
   }
   handleLikeClick(): void {
@@ -120,5 +132,34 @@ export class WatchComponent implements OnInit, OnDestroy {
       alert('You must log in to use this feature.');
       return;
     }
+
+    if (!this.video) return;
+
+    // Optimistic UI update - odmah ažuriraj UI pre nego što stigne odgovor sa servera
+    const wasLiked = this.video.isLikedByCurrentUser;
+    const previousLikeCount = this.video.likeCount;
+
+    // Odmah ažuriraj UI
+    this.video.isLikedByCurrentUser = !wasLiked;
+    this.video.likeCount = wasLiked ? previousLikeCount - 1 : previousLikeCount + 1;
+
+    this.videoService.toggleLike(this.video.id).subscribe({
+      next: (updatedVideo) => {
+        // Ažuriraj sa stvarnim podacima sa servera
+        if (this.video) {
+          this.video.likeCount = updatedVideo.likeCount;
+          this.video.isLikedByCurrentUser = updatedVideo.isLikedByCurrentUser;
+        }
+      },
+      error: (err) => {
+        console.error('Failed to toggle like:', err);
+        // Vrati na prethodno stanje ako je došlo do greške
+        if (this.video) {
+          this.video.isLikedByCurrentUser = wasLiked;
+          this.video.likeCount = previousLikeCount;
+        }
+        alert('Failed to like video. Please try again.');
+      }
+    });
   }
 }

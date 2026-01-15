@@ -36,25 +36,25 @@ public class AuthService {
 
     @Transactional
     public void register(RegisterRequest request) {
-        // Validate passwords match
+        // Provera lozinki
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new BadRequestException("Lozinke se ne poklapaju");
         }
 
-        // Check if email exists
+        // Provera ako email već postoji
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Email adresa je već u upotrebi");
         }
 
-        // Check if username exists
+        // Provera ako korisničko ime već postoji
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new BadRequestException("Korisničko ime je već u upotrebi");
         }
 
-        // Generate activation token
+        // Generisanje aktivacionog tokena
         String activationToken = UUID.randomUUID().toString();
 
-        // Create user
+        // Kreiranje novog korisnika
         User user = User.builder()
                 .email(request.getEmail())
                 .username(request.getUsername())
@@ -71,13 +71,13 @@ public class AuthService {
         userRepository.save(user);
         log.info("User registered successfully: {} with activation token: {}", user.getEmail(), activationToken);
 
-        // Send activation email
+        // Posalji aktivacioni email
         try {
             emailService.sendActivationEmail(user, activationToken);
             log.info("Activation email queued for sending to: {}", user.getEmail());
         } catch (Exception e) {
             log.error("Failed to send activation email to: {}", user.getEmail(), e);
-            // Don't throw exception - user is already registered, just log the error
+            // Ne saljemo exception dalje da ne bismo otkrili postojanje korisnika
         }
     }
 

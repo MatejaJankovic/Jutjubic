@@ -66,4 +66,9 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.searchQuery = '';
     this.router.navigate(['/']);
   }
+
+  navigateHome(): void {
+    this.searchQuery = '';
+    this.router.navigate(['/']);
+  }
 }

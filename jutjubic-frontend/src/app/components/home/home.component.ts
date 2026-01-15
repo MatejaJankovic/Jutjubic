@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, ActivatedRoute } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { Video, VideoPageResponse } from '../../models/video.model';
 import { Subscription } from 'rxjs';
+import { map, skip, filter } from 'rxjs/operators';
 import { environment } from '../../env/environment';
 
 @Component({
@@ -27,18 +28,32 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(
     private videoService: VideoService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    // Odmah učitaj početni search query i videe
+    this.searchQuery = this.route.snapshot.queryParams['search'] || '';
+    this.loadVideos();
+
+    // Slušaj BUDUĆE promene query parametara (preskoči prvu jer smo je već obradili)
     this.subscription.add(
-      this.route.queryParams.subscribe(params => {
-        this.searchQuery = params['search'] || '';
-        this.currentPage = 0;
-        this.videos = [];
-        this.loadVideos();
+      this.route.queryParams.pipe(
+        skip(1),
+        map(params => params['search'] || '')
+      ).subscribe(searchQuery => {
+        this.searchQuery = searchQuery;
+        this.refreshVideos();
       })
     );
+  }
+
+  private refreshVideos(): void {
+    this.currentPage = 0;
+    this.videos = [];
+    this.loading = false;
+    this.loadVideos();
   }
 
   ngOnDestroy(): void {
@@ -74,9 +89,11 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.totalPages = response.totalPages;
           this.hasNext = response.hasNext;
           this.loading = false;
+          this.cdr.detectChanges(); // Prisili Angular da osveži UI
         },
         error: () => {
           this.loading = false;
+          this.cdr.detectChanges();
         }
       })
     );
