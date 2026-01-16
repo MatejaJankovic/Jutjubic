@@ -1,0 +1,75 @@
+.map-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.map-header {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0.5rem 0 0 0;
+    font-size: 1rem;
+    opacity: 0.9;
+  }
+}
+
+.map {
+  flex: 1;
+  min-height: 600px;
+  width: 100%;
+  z-index: 1;
+}
+
+// Leaflet default styles fix
+:host ::ng-deep {
+  .leaflet-pane,
+  .leaflet-tile,
+  .leaflet-marker-icon,
+  .leaflet-marker-shadow,
+  .leaflet-tile-container,
+  .leaflet-pane > svg,
+  .leaflet-pane > canvas,
+  .leaflet-zoom-box,
+  .leaflet-image-layer,
+  .leaflet-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .leaflet-container {
+    overflow: hidden;
+    background: #ddd;
+  }
+
+  .leaflet-marker-icon,
+  .leaflet-marker-shadow {
+    display: block;
+  }
+
+  .leaflet-tile-container img {
+    max-width: none !important;
+    max-height: none !important;
+  }
+
+  .leaflet-control {
+    z-index: 800;
+  }
+
+  .leaflet-top,
+  .leaflet-bottom {
+    z-index: 1000;
+  }
+}
+
