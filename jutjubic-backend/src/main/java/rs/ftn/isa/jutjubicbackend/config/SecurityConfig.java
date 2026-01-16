@@ -33,7 +33,7 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.disable());
 
-        http.cors(cors -> {});   // uključi CORS bez deprecated API-ja
+        http.cors(cors -> {});
 
         http.sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -53,7 +53,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/likes/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/likes/**").authenticated()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll() // <-- ključno
+                .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated()
         );
