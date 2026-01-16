@@ -11,8 +11,9 @@ export interface VideoMarker {
   latitude: number;
   longitude: number;
   thumbnailUrl: string;
-  views: number;
-  uploadDate: string;
+  viewCount: number;
+  createdAt: string;
+  username: string;
 }
 
 export interface VideoTile {

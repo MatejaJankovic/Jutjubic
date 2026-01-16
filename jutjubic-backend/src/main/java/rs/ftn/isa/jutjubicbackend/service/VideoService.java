@@ -211,6 +211,8 @@ public class VideoService {
                     .description(request.getDescription())
                     .tags(request.getTags())
                     .location(request.getLocation())
+                    .latitude(request.getLatitude())
+                    .longitude(request.getLongitude())
                     .videoUrl("/uploads/videos/" + videoName)
                     .thumbnailUrl("/uploads/thumbnails/" + thumbName)
                     .user(getCurrentUser())
@@ -219,8 +221,8 @@ public class VideoService {
                     .commentCount(0L)
                     .build();
 
-
             videoRepository.save(videoEntity);
+
 
             return VideoDTO.fromEntity(videoEntity);
 

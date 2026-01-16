@@ -42,5 +42,14 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     @Query("UPDATE Video v SET v.likeCount = v.likeCount - 1 WHERE v.id = :id AND v.likeCount > 0")
     int decrementLikeCountById(@Param("id") Long id);
 
+    @Query("SELECT v FROM Video v WHERE v.latitude IS NOT NULL AND v.longitude IS NOT NULL " +
+            "AND v.latitude BETWEEN :south AND :north " +
+            "AND v.longitude BETWEEN :west AND :east " +
+            "ORDER BY v.createdAt DESC")
+    List<Video> findVideosInBounds(@Param("north") Double north,
+                                    @Param("south") Double south,
+                                    @Param("east") Double east,
+                                    @Param("west") Double west);
+
 }
 

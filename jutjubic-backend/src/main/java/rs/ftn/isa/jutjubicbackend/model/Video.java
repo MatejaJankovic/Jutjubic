@@ -66,6 +66,12 @@ public class Video {
     @Column(name = "location")
     private String location;
 
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

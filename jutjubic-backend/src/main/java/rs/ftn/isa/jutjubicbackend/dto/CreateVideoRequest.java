@@ -16,4 +16,8 @@ public class CreateVideoRequest {
     private List<String> tags;
 
     private String location;
+
+    private Double latitude;
+
+    private Double longitude;
 }

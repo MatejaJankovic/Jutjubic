@@ -21,7 +21,7 @@ public class CacheConfig {
 
     @Bean
     public CaffeineCacheManager cacheManager(Caffeine<Object, Object> caffeine) {
-        CaffeineCacheManager manager = new CaffeineCacheManager("comments", "videos", "users");
+        CaffeineCacheManager manager = new CaffeineCacheManager("comments", "videos", "users", "mapTiles");
         manager.setCaffeine(caffeine);
         return manager;
     }

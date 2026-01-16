@@ -14,6 +14,8 @@ export interface Video {
   userLastName: string;
   createdAt: string;
   isLikedByCurrentUser?: boolean;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface VideoPageResponse {

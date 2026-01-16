@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../env/environment';
+import { VideoMarker } from '../models/map.model';
 
 export interface MapBounds {
   north: number;
@@ -10,20 +11,10 @@ export interface MapBounds {
   west: number;
 }
 
-export interface VideoMarker {
-  id: number;
-  title: string;
-  latitude: number;
-  longitude: number;
-  thumbnailUrl: string;
-  views: number;
-  uploadDate: string;
-}
 
 export interface TileRequest {
   zoom: number;
   bounds: MapBounds;
-  timePeriod?: 'all' | 'last30days' | 'currentYear';
 }
 
 @Injectable({
@@ -45,8 +36,7 @@ export class MapService {
       .set('north', tileRequest.bounds.north.toString())
       .set('south', tileRequest.bounds.south.toString())
       .set('east', tileRequest.bounds.east.toString())
-      .set('west', tileRequest.bounds.west.toString())
-      .set('timePeriod', tileRequest.timePeriod || 'all');
+      .set('west', tileRequest.bounds.west.toString());
 
     return this.http.get<VideoMarker[]>(`${this.apiUrl}/videos`, { params });
   }
