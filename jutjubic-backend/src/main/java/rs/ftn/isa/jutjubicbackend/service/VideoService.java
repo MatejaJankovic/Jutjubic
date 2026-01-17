@@ -2,6 +2,7 @@ package rs.ftn.isa.jutjubicbackend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,8 @@ public class VideoService {
 
     private final VideoRepository videoRepository;
     private final VideoLikeRepository videoLikeRepository;
+    private final MapService mapService;
+    private final CacheManager cacheManager;
     @Autowired
     private UserRepository userRepository;
 
@@ -222,6 +225,13 @@ public class VideoService {
                     .build();
 
             videoRepository.save(videoEntity);
+
+            // Konvertuj lat/lng u tile koordinatu za zoom nivo mape
+            var tile = mapService.latLngToTile(videoEntity.getLatitude(), videoEntity.getLongitude(), 12); // npr. zoom 12
+            // Napravi key koji je isti kao kod @Cacheable u MapService
+            String cacheKey = tile.x + "_" + tile.y + "_" + tile.zoom;
+            // Evikuj samo taj tile
+            mapService.evictTileCache(cacheKey);
 
 
             return VideoDTO.fromEntity(videoEntity);

@@ -1,6 +1,7 @@
 package rs.ftn.isa.jutjubicbackend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import rs.ftn.isa.jutjubicbackend.dto.VideoMarkerDTO;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class MapService {
 
     private final VideoRepository videoRepository;
+    private final CacheManager cacheManager;
 
     /**
      * Dobavlja video markere za određeni viewport (bounds) mape
@@ -83,6 +85,12 @@ public class MapService {
         }
 
         return markers;
+    }
+
+    public void evictTileCache(String key) {
+        if (cacheManager.getCache("mapTiles") != null) {
+            cacheManager.getCache("mapTiles").evict(key);
+        }
     }
 
     /**
