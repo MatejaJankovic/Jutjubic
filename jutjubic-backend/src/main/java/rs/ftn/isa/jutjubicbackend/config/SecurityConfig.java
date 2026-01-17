@@ -44,6 +44,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/ping").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/map/**").permitAll()
+                .requestMatchers("/api/admin/**").permitAll() // For development/testing - should be secured in production
                 .requestMatchers(HttpMethod.POST, "/api/videos/*/view").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/videos/*/comments").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()
