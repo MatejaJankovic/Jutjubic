@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { Video, VideoPageResponse } from '../../models/video.model';
 import { Subscription } from 'rxjs';
-import { map, skip, filter } from 'rxjs/operators';
+import { map, skip } from 'rxjs/operators';
 import { environment } from '../../env/environment';
 
 @Component({
@@ -19,7 +19,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   loading = false;
   currentPage = 0;
   totalPages = 0;
-  hasNext = false;
+  totalElements = 0;
+  pageSize = 12; // 3 reda x 4 kolone
   searchQuery = '';
   environment = environment;
   activeVideo: Video | null = null;
@@ -33,27 +34,19 @@ export class HomeComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Odmah učitaj početni search query i videe
     this.searchQuery = this.route.snapshot.queryParams['search'] || '';
     this.loadVideos();
 
-    // Slušaj BUDUĆE promene query parametara (preskoči prvu jer smo je već obradili)
     this.subscription.add(
       this.route.queryParams.pipe(
         skip(1),
         map(params => params['search'] || '')
       ).subscribe(searchQuery => {
         this.searchQuery = searchQuery;
-        this.refreshVideos();
+        this.currentPage = 0;
+        this.loadVideos();
       })
     );
-  }
-
-  private refreshVideos(): void {
-    this.currentPage = 0;
-    this.videos = [];
-    this.loading = false;
-    this.loadVideos();
   }
 
   ngOnDestroy(): void {
@@ -67,29 +60,28 @@ export class HomeComponent implements OnInit, OnDestroy {
     );
   }
 
-
-
   closeVideoModal(): void {
     this.activeVideo = null;
   }
 
-
   loadVideos(): void {
     if (this.loading) return;
     this.loading = true;
+    this.videos = []; // Clear existing videos
 
     const request = this.searchQuery
-      ? this.videoService.searchVideos(this.searchQuery, this.currentPage, 12)
-      : this.videoService.getAllVideos(this.currentPage, 12);
+      ? this.videoService.searchVideos(this.searchQuery, this.currentPage, this.pageSize)
+      : this.videoService.getAllVideos(this.currentPage, this.pageSize);
 
     this.subscription.add(
       request.subscribe({
         next: (response: VideoPageResponse) => {
-          this.videos = [...this.videos, ...response.videos];
+          this.videos = response.videos;
           this.totalPages = response.totalPages;
-          this.hasNext = response.hasNext;
+          this.totalElements = response.totalElements;
           this.loading = false;
-          this.cdr.detectChanges(); // Prisili Angular da osveži UI
+          this.scrollToTop();
+          this.cdr.detectChanges();
         },
         error: () => {
           this.loading = false;
@@ -99,25 +91,69 @@ export class HomeComponent implements OnInit, OnDestroy {
     );
   }
 
-  loadMore(): void {
-    if (!this.hasNext || this.loading) return;
-    this.currentPage++;
-    this.loadVideos();
-  }
-
-  @HostListener('window:scroll')
-  onScroll(): void {
-    const scrollPosition = window.innerHeight + window.scrollY;
-    const documentHeight = document.documentElement.scrollHeight;
-
-    if (scrollPosition >= documentHeight - 500 && this.hasNext && !this.loading) {
-      this.loadMore();
+  // Pagination navigation methods
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages && page !== this.currentPage) {
+      this.currentPage = page;
+      this.loadVideos();
     }
   }
 
-//   onVideoClick(video: Video): void {
-//     this.router.navigate(['/watch', video.id]);
-//   }
+  nextPage(): void {
+    if (this.currentPage < this.totalPages - 1) {
+      this.currentPage++;
+      this.loadVideos();
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 0) {
+      this.currentPage--;
+      this.loadVideos();
+    }
+  }
+
+  goToFirstPage(): void {
+    if (this.currentPage !== 0) {
+      this.currentPage = 0;
+      this.loadVideos();
+    }
+  }
+
+  goToLastPage(): void {
+    const lastPage = this.totalPages - 1;
+    if (this.currentPage !== lastPage) {
+      this.currentPage = lastPage;
+      this.loadVideos();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxPagesToShow = 5;
+
+    if (this.totalPages <= maxPagesToShow) {
+      for (let i = 0; i < this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      let startPage = Math.max(0, this.currentPage - 2);
+      let endPage = Math.min(this.totalPages - 1, this.currentPage + 2);
+
+      if (this.currentPage < 2) {
+        endPage = Math.min(this.totalPages - 1, 4);
+      }
+      if (this.currentPage > this.totalPages - 3) {
+        startPage = Math.max(0, this.totalPages - 5);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+    }
+
+    return pages;
+  }
 
   formatDuration(seconds: number): string {
     return this.videoService.formatDuration(seconds);
@@ -149,5 +185,5 @@ export class HomeComponent implements OnInit, OnDestroy {
     video.pause();
     video.currentTime = 0;
   }
-
 }
+
