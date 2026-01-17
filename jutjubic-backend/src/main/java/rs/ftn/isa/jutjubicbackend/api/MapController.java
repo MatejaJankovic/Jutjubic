@@ -26,9 +26,13 @@ public class MapController {
             @RequestParam Double south,
             @RequestParam Double east,
             @RequestParam Double west,
-            @RequestParam(required = false) Integer zoom) {
-
-        List<VideoMarkerDTO> markers = mapService.getVideosForViewport(north, south, east, west, zoom);
+            @RequestParam(required = false) Integer zoom,
+            @RequestParam(required = false) String startDate, // ISO format yyyy-MM-dd
+            @RequestParam(required = false) String endDate    // ISO format yyyy-MM-dd
+    ) {
+        List<VideoMarkerDTO> markers = mapService.getVideosForViewport(
+                north, south, east, west, zoom, startDate, endDate
+        );
         return ResponseEntity.ok(markers);
     }
 }

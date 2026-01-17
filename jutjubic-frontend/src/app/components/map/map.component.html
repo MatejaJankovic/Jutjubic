@@ -3,6 +3,23 @@
     <h1>Mapa Video Snimaka</h1>
     <p>Pregledajte video snimke iz različitih delova sveta</p>
   </div>
-  <div id="map" class="map"></div>
-</div>
 
+  <div class="map-filters">
+    <label class="rec" for="startDate">Od:</label>
+    <input type="date" id="startDate" [(ngModel)]="startDate" (change)="onDateChange()" />
+
+    <label class="rec" for="endDate">Do:</label>
+    <input type="date" id="endDate" [(ngModel)]="endDate" (change)="onDateChange()" />
+    <button
+      class="clear-btn"
+      (click)="clearDates()"
+      [disabled]="!startDate && !endDate"
+    >
+      Poništi
+    </button>
+
+  </div>
+
+
+  <div id="map" style="height: 600px;"></div>
+</div>

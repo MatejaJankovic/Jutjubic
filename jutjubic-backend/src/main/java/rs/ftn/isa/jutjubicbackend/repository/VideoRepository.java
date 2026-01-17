@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import rs.ftn.isa.jutjubicbackend.model.Video;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -50,6 +51,25 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
                                     @Param("south") Double south,
                                     @Param("east") Double east,
                                     @Param("west") Double west);
+
+    @Query("""
+    SELECT v FROM Video v
+    WHERE v.latitude IS NOT NULL
+      AND v.longitude IS NOT NULL
+      AND v.latitude BETWEEN :south AND :north
+      AND v.longitude BETWEEN :west AND :east
+      AND v.createdAt >= :startDate
+      AND v.createdAt <= :endDate
+    ORDER BY v.createdAt DESC
+""")
+    List<Video> findVideosInBoundsAndCreatedBetween(
+            @Param("north") Double north,
+            @Param("south") Double south,
+            @Param("east") Double east,
+            @Param("west") Double west,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 
 }
 

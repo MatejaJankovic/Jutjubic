@@ -15,6 +15,8 @@ export interface MapBounds {
 export interface TileRequest {
   zoom: number;
   bounds: MapBounds;
+  startDate?: string; // format 'yyyy-MM-dd'
+  endDate?: string;   // format 'yyyy-MM-dd'
 }
 
 @Injectable({
@@ -31,12 +33,19 @@ export class MapService {
    * @returns Observable sa video markerima
    */
   getVideosForViewport(tileRequest: TileRequest): Observable<VideoMarker[]> {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('zoom', tileRequest.zoom.toString())
       .set('north', tileRequest.bounds.north.toString())
       .set('south', tileRequest.bounds.south.toString())
       .set('east', tileRequest.bounds.east.toString())
       .set('west', tileRequest.bounds.west.toString());
+
+    if (tileRequest.startDate) {
+       params = params.set('startDate', tileRequest.startDate);
+    }
+    if (tileRequest.endDate) {
+       params = params.set('endDate', tileRequest.endDate);
+    }
 
     return this.http.get<VideoMarker[]>(`${this.apiUrl}/videos`, { params });
   }

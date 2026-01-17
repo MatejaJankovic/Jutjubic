@@ -7,6 +7,10 @@ import rs.ftn.isa.jutjubicbackend.dto.VideoMarkerDTO;
 import rs.ftn.isa.jutjubicbackend.model.Video;
 import rs.ftn.isa.jutjubicbackend.repository.VideoRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,9 +34,38 @@ public class MapService {
     @Cacheable(value = "mapTiles", key = "#north + '_' + #south + '_' + #east + '_' + #west + '_' + #zoom")
     public List<VideoMarkerDTO> getVideosForViewport(Double north, Double south,
                                                        Double east, Double west,
-                                                       Integer zoom) {
+                                                       Integer zoom, String startDateStr, String endDateStr) {
 
-        List<Video> videos = videoRepository.findVideosInBounds(north, south, east, west);
+        LocalDateTime startDate = null;
+        LocalDateTime endDate = null;
+
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
+
+        try {
+            if (startDateStr != null) startDate = LocalDate.parse(startDateStr, formatter).atStartOfDay();
+            if (endDateStr != null) endDate = LocalDate.parse(endDateStr, formatter).atTime(23, 59, 59);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Datumi nisu u ispravnom formatu yyyy-MM-dd");
+        }
+
+        List<Video> videos;
+
+        if (startDate == null && endDate == null) {
+            videos = videoRepository.findVideosInBounds(north, south, east, west);
+        } else {
+
+            if (startDate == null) {
+                startDate = LocalDate.of(1970, 1, 1).atStartOfDay();
+            }
+
+            if (endDate == null) {
+                endDate = LocalDateTime.now();
+            }
+
+            videos = videoRepository.findVideosInBoundsAndCreatedBetween(
+                    north, south, east, west, startDate, endDate
+            );
+        }
 
         List<VideoMarkerDTO> markers = videos.stream()
                 .map(VideoMarkerDTO::fromEntity)

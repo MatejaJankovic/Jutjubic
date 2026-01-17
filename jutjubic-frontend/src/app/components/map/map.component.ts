@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import * as L from 'leaflet';
 import { MapService } from '../../services/map.service';
 import { TILE_CONFIGS, ZoomLevel, VideoMarker } from '../../models/map.model';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-map',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss']
 })
@@ -18,6 +19,9 @@ export class MapComponent implements OnInit, OnDestroy {
   private readonly DEFAULT_LAT = 45.2671; // Novi Sad
   private readonly DEFAULT_LNG = 19.8335; // Novi Sad
   private readonly DEFAULT_ZOOM = 8; // Veći zoom da se vide lokalni videi
+
+  startDate?: string; // format yyyy-MM-dd
+  endDate?: string;
 
   constructor(
     private mapService: MapService,
@@ -33,6 +37,17 @@ export class MapComponent implements OnInit, OnDestroy {
       this.map.remove();
     }
   }
+   // Auto refres kada se datum promeni
+    onDateChange(): void {
+      this.loadVideosForCurrentView();
+    }
+
+    clearDates() {
+      this.startDate = '';
+      this.endDate = '';
+
+      this.loadVideosForCurrentView();
+    }
 
   private initMap(): void {
     // Kreiranje mape sa default view na Evropu
@@ -87,13 +102,15 @@ export class MapComponent implements OnInit, OnDestroy {
     const zoom = this.map.getZoom();
 
     const tileRequest = {
-      zoom: zoom,
+      zoom,
       bounds: {
         north: bounds.getNorth(),
         south: bounds.getSouth(),
         east: bounds.getEast(),
         west: bounds.getWest()
-      }
+      },
+      startDate: this.startDate ? this.startDate : undefined,
+      endDate: this.endDate ? this.endDate : undefined
     };
 
     this.mapService.getVideosForViewport(tileRequest).subscribe({
