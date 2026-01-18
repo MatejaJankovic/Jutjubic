@@ -7,12 +7,15 @@ import org.springframework.stereotype.Service;
 import rs.ftn.isa.jutjubicbackend.dto.VideoMarkerDTO;
 import rs.ftn.isa.jutjubicbackend.model.Video;
 import rs.ftn.isa.jutjubicbackend.repository.VideoRepository;
+import rs.ftn.isa.jutjubicbackend.service.strategy.TileAggregationStrategy;
+import rs.ftn.isa.jutjubicbackend.service.strategy.TileStrategyFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +24,7 @@ public class MapService {
 
     private final VideoRepository videoRepository;
     private final CacheManager cacheManager;
+    private final TileStrategyFactory tileStrategyFactory;
 
     /**
      * Dobavlja video markere za određeni viewport (bounds) mape
@@ -73,15 +77,32 @@ public class MapService {
                 .map(VideoMarkerDTO::fromEntity)
                 .collect(Collectors.toList());
 
-        if (zoom != null && zoom < 6) {
-            return markers.stream()
-                    .sorted((v1, v2) -> Long.compare(v2.getViewCount(), v1.getViewCount()))
-                    .limit(50)
+        // Apply strategy pattern based on zoom level
+        if (zoom != null) {
+            TileAggregationStrategy strategy = tileStrategyFactory.getStrategy(zoom);
+
+            // Log for debugging
+            System.out.println("[MapService] Zoom: " + zoom +
+                ", Strategy: " + strategy.getClass().getSimpleName() +
+                ", MaxVideosPerTile: " + strategy.getMaxVideosPerTile() +
+                ", TotalVideosInView: " + videos.size());
+
+            // Get selected video IDs using the strategy
+            List<Long> selectedVideoIds = strategy.selectVideos(videos, strategy.getMaxVideosPerTile());
+            Set<Long> selectedIdSet = selectedVideoIds.stream().collect(Collectors.toSet());
+
+            // Get representative video ID for clustering
+            Long representativeVideoId = strategy.selectRepresentativeVideo(videos);
+
+            // Log filtered results
+            System.out.println("[MapService] Selected " + selectedVideoIds.size() + " videos after strategy filter");
+
+            // Filter markers to only include selected videos
+            markers = markers.stream()
+                    .filter(m -> selectedIdSet.contains(m.getId()))
                     .collect(Collectors.toList());
-        } else if (zoom != null && zoom < 11) {
-            return markers.stream()
-                    .limit(200)
-                    .collect(Collectors.toList());
+
+            System.out.println("[MapService] Returning " + markers.size() + " markers to frontend");
         }
 
         return markers;
@@ -115,5 +136,86 @@ public class MapService {
             this.zoom = zoom;
         }
     }
-}
 
+    /**
+     * Data class for storing tile aggregation information.
+     * Contains selected video IDs, representative video, and metadata.
+     */
+    public static class TileData {
+        public final int zoomLevel;
+        public final int tileX;
+        public final int tileY;
+        public final List<Long> videoIds;
+        public final int videoCount;
+        public final Long representativeVideoId;
+        public final LocalDateTime lastUpdated;
+        public final boolean shouldCluster;
+
+        public TileData(int zoomLevel, int tileX, int tileY, List<Long> videoIds,
+                        int videoCount, Long representativeVideoId, boolean shouldCluster) {
+            this.zoomLevel = zoomLevel;
+            this.tileX = tileX;
+            this.tileY = tileY;
+            this.videoIds = videoIds;
+            this.videoCount = videoCount;
+            this.representativeVideoId = representativeVideoId;
+            this.lastUpdated = LocalDateTime.now();
+            this.shouldCluster = shouldCluster;
+        }
+    }
+
+    /**
+     * Creates or updates tile data for the given tile coordinates.
+     * Uses the appropriate strategy based on zoom level to select videos.
+     *
+     * @param x Tile X coordinate
+     * @param y Tile Y coordinate
+     * @param zoom Zoom level
+     * @return TileData containing selected videos and metadata
+     */
+    public TileData createOrUpdateTile(int x, int y, int zoom) {
+        // Calculate bounding box for the tile
+        double north = tileToLat(y, zoom);
+        double south = tileToLat(y + 1, zoom);
+        double west = tileToLng(x, zoom);
+        double east = tileToLng(x + 1, zoom);
+
+        // Get videos from repository using bounding box
+        List<Video> videos = videoRepository.findVideosInBounds(north, south, east, west);
+
+        // Choose strategy based on zoom level
+        TileAggregationStrategy strategy = tileStrategyFactory.getStrategy(zoom);
+
+        // Select video IDs using strategy
+        List<Long> selectedVideoIds = strategy.selectVideos(videos, strategy.getMaxVideosPerTile());
+
+        // Select representative video using strategy
+        Long representativeVideoId = strategy.selectRepresentativeVideo(videos);
+
+        // Store tile data with all required information
+        return new TileData(
+                zoom,                           // zoomLevel
+                x,                              // tileX
+                y,                              // tileY
+                selectedVideoIds,               // videoIds (selected by strategy)
+                videos.size(),                  // videoCount (ALL videos in tile)
+                representativeVideoId,          // representativeVideoId
+                strategy.shouldCluster()        // shouldCluster flag
+        );
+    }
+
+    /**
+     * Converts tile Y coordinate to latitude.
+     */
+    private double tileToLat(int y, int zoom) {
+        double n = Math.PI - 2.0 * Math.PI * y / Math.pow(2, zoom);
+        return Math.toDegrees(Math.atan(Math.sinh(n)));
+    }
+
+    /**
+     * Converts tile X coordinate to longitude.
+     */
+    private double tileToLng(int x, int zoom) {
+        return x / Math.pow(2, zoom) * 360.0 - 180.0;
+    }
+}
