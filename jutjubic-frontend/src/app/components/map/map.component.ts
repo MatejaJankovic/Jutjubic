@@ -33,9 +33,6 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.updateSubscription) {
-      this.updateSubscription.unsubscribe();
-    }
     if (this.map) {
       this.map.remove();
     }
@@ -135,8 +132,8 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Deduplicates videos that would render in the same pixel cell.
-   * Uses adaptive cell sizing based on zoom level and smarter selection logic.
+   * Deduplicates videos that would render in the same geographic cell.
+   * Uses geographic grid (lat/lng) for stable marker placement.
    *
    * @param videos List of videos to deduplicate
    * @returns Filtered list with no overlapping markers
@@ -144,11 +141,11 @@ export class MapComponent implements OnInit, OnDestroy {
   private dedupeStackedVideos(videos: VideoMarker[]): VideoMarker[] {
     const zoom = this.map.getZoom();
 
-    // Adaptive cell size: smaller cells at higher zoom (show more), larger at low zoom (prevent clutter)
-    // Zoom 1-5: 40px cells (aggressive dedup)
-    // Zoom 6-10: 30px cells (moderate dedup)
-    // Zoom 11+: 20px cells (minimal dedup, most videos show)
-    const cellSizePx = zoom >= 11 ? 20 : zoom >= 6 ? 30 : 40;
+    // Geographic cell size in degrees (smaller = more videos shown)
+    // Zoom 1-5: 0.15° cells (~16.5km) - allows ~20 videos
+    // Zoom 6-10: 0.05° cells (~5.5km) - allows ~30 videos
+    // Zoom 11+: 0.01° cells (~1.1km) - allows ~50+ videos
+    const cellSizeDegrees = zoom >= 11 ? 0.01 : zoom >= 6 ? 0.05 : 0.15;
 
     // Sort by viewCount descending so higher priority videos are processed first
     const sortedVideos = [...videos].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
@@ -161,13 +158,10 @@ export class MapComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Convert geographic coordinates to pixel coordinates
-      const pixelPoint = this.map.project([video.latitude, video.longitude], zoom);
-
-      // Calculate which cell this video belongs to
-      const cellX = Math.floor(pixelPoint.x / cellSizePx);
-      const cellY = Math.floor(pixelPoint.y / cellSizePx);
-      const cellKey = `${cellX}:${cellY}`;
+      // Calculate which geographic cell this video belongs to
+      const cellLat = Math.floor(video.latitude / cellSizeDegrees);
+      const cellLng = Math.floor(video.longitude / cellSizeDegrees);
+      const cellKey = `${cellLat}:${cellLng}`;
 
       // Only add if this cell is empty (first come, first served based on viewCount)
       if (!cellMap.has(cellKey)) {
@@ -176,7 +170,7 @@ export class MapComponent implements OnInit, OnDestroy {
       }
     });
 
-    console.log(`[Deduplication] Zoom: ${zoom}, CellSize: ${cellSizePx}px, Input: ${videos.length}, Output: ${selectedVideos.length}`);
+    console.log(`[Deduplication] Zoom: ${zoom}, CellSize: ${cellSizeDegrees}°, Input: ${videos.length}, Output: ${selectedVideos.length}`);
 
     return selectedVideos;
   }
@@ -190,9 +184,6 @@ export class MapComponent implements OnInit, OnDestroy {
         const marker = this.createVideoMarker(video);
         marker.addTo(this.map);
         this.markers.push(marker);
-
-        // Track the marker for updates
-        this.videoMarkerMap.set(video.id, { marker, video });
       }
     });
   }
