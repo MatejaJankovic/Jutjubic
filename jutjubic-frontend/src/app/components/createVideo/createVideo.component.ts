@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import * as L from 'leaflet';
 
 @Component({
   selector: 'app-create-video',
@@ -12,22 +13,97 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule]
 })
-export class CreateVideoComponent {
+export class CreateVideoComponent implements OnInit, OnDestroy {
   title = '';
   description = '';
   tags = '';
   videoFile: File | null = null;
   thumbnailFile: File | null = null;
   location = '';
+  latitude: number | null = null;
+  longitude: number | null = null;
 
   uploading = false;
   errorMessage = '';
+
+  private map!: L.Map;
+  private marker!: L.Marker;
 
   constructor(
     private videoService: VideoService,
     private authService: AuthService,
     private router: Router
   ) {}
+
+  ngOnInit(): void {
+    // Initialize map after view is ready
+    setTimeout(() => this.initMap(), 100);
+  }
+
+  ngOnDestroy(): void {
+    if (this.map) {
+      this.map.remove();
+    }
+  }
+
+  private initMap(): void {
+    // Create map with default view
+    this.map = L.map('location-map', {
+      center: [45.2671, 19.8335], // Novi Sad coordinates as default
+      zoom: 13, // Veći zoom za bolju preciznost
+      minZoom: 2,
+      maxZoom: 18
+    });
+
+    // Add OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 18
+    }).addTo(this.map);
+
+    // Fix for Leaflet default marker icon
+    const iconDefault = L.icon({
+      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+      iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+    L.Marker.prototype.options.icon = iconDefault;
+
+    // Add click listener to place marker
+    this.map.on('click', (e: L.LeafletMouseEvent) => {
+      this.onMapClick(e);
+    });
+  }
+
+  private onMapClick(e: L.LeafletMouseEvent): void {
+    const { lat, lng } = e.latlng;
+    this.latitude = lat;
+    this.longitude = lng;
+
+    // Remove existing marker if any
+    if (this.marker) {
+      this.map.removeLayer(this.marker);
+    }
+
+    // Add new marker
+    this.marker = L.marker([lat, lng], {
+      draggable: true
+    }).addTo(this.map);
+
+    // Update coordinates when marker is dragged
+    this.marker.on('dragend', () => {
+      const position = this.marker.getLatLng();
+      this.latitude = position.lat;
+      this.longitude = position.lng;
+    });
+
+    // Add popup to marker
+    this.marker.bindPopup(`Lokacija: ${lat.toFixed(4)}, ${lng.toFixed(4)}`).openPopup();
+  }
 
   videoName: string = '';
   thumbnailName: string = '';
@@ -79,22 +155,17 @@ export class CreateVideoComponent {
       title: this.title,
       description: this.description,
       tags: this.tags.split(',').map(t => t.trim()),
-      location: this.location
+      location: this.location,
+      latitude: this.latitude,
+      longitude: this.longitude
     };
 
     const formData = new FormData();
     formData.append('data', JSON.stringify(meta));
     formData.append('video', this.videoFile);
-
     formData.append('thumbnail', this.thumbnailFile!);
 
     const token = this.authService.getToken();
-
-    console.log('Token:', token);
-    console.log('FormData entries:');
-    formData.forEach((value, key) => {
-      console.log(key, value);
-    });
 
     if (!token) {
       this.errorMessage = 'Nema tokena, prijavite se ponovo.';
@@ -106,7 +177,6 @@ export class CreateVideoComponent {
     this.videoService.createVideo(formData, token).subscribe({
       next: (video) => {
         this.uploading = false;
-        console.log('Upload uspeo:', video);
         this.router.navigate(['']);
       },
       error: (err) => {

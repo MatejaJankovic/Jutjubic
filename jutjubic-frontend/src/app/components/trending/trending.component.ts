@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { VideoService } from '../../services/video.service';
@@ -18,7 +18,8 @@ export class TrendingComponent implements OnInit, OnDestroy {
   loading = false;
   currentPage = 0;
   totalPages = 0;
-  hasNext = false;
+  totalElements = 0;
+  pageSize = 12; // 3 reda x 4 kolone
   environment = environment;
   private subscription = new Subscription();
 
@@ -29,7 +30,6 @@ export class TrendingComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Odmah učitaj videe
     this.loadVideos();
   }
 
@@ -37,25 +37,20 @@ export class TrendingComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  private refreshVideos(): void {
-    this.currentPage = 0;
-    this.videos = [];
-    this.loading = false;
-    this.loadVideos();
-  }
-
   loadVideos(): void {
     if (this.loading) return;
     this.loading = true;
+    this.videos = []; // Clear existing videos
 
     this.subscription.add(
-      this.videoService.getTrendingVideos(this.currentPage, 12).subscribe({
+      this.videoService.getTrendingVideos(this.currentPage, this.pageSize).subscribe({
         next: (response: VideoPageResponse) => {
-          this.videos = [...this.videos, ...response.videos];
+          this.videos = response.videos;
           this.totalPages = response.totalPages;
-          this.hasNext = response.hasNext;
+          this.totalElements = response.totalElements;
           this.loading = false;
-          this.cdr.detectChanges(); // Prisili Angular da osveži UI
+          this.scrollToTop();
+          this.cdr.detectChanges();
         },
         error: () => {
           this.loading = false;
@@ -65,20 +60,68 @@ export class TrendingComponent implements OnInit, OnDestroy {
     );
   }
 
-  loadMore(): void {
-    if (!this.hasNext || this.loading) return;
-    this.currentPage++;
-    this.loadVideos();
+  // Pagination navigation methods
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages && page !== this.currentPage) {
+      this.currentPage = page;
+      this.loadVideos();
+    }
   }
 
-  @HostListener('window:scroll')
-  onScroll(): void {
-    const scrollPosition = window.innerHeight + window.scrollY;
-    const documentHeight = document.documentElement.scrollHeight;
-
-    if (scrollPosition >= documentHeight - 500 && this.hasNext && !this.loading) {
-      this.loadMore();
+  nextPage(): void {
+    if (this.currentPage < this.totalPages - 1) {
+      this.currentPage++;
+      this.loadVideos();
     }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 0) {
+      this.currentPage--;
+      this.loadVideos();
+    }
+  }
+
+  goToFirstPage(): void {
+    if (this.currentPage !== 0) {
+      this.currentPage = 0;
+      this.loadVideos();
+    }
+  }
+
+  goToLastPage(): void {
+    const lastPage = this.totalPages - 1;
+    if (this.currentPage !== lastPage) {
+      this.currentPage = lastPage;
+      this.loadVideos();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxPagesToShow = 5;
+
+    if (this.totalPages <= maxPagesToShow) {
+      for (let i = 0; i < this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      let startPage = Math.max(0, this.currentPage - 2);
+      let endPage = Math.min(this.totalPages - 1, this.currentPage + 2);
+
+      if (this.currentPage < 2) {
+        endPage = Math.min(this.totalPages - 1, 4);
+      }
+      if (this.currentPage > this.totalPages - 3) {
+        startPage = Math.max(0, this.totalPages - 5);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+    }
+
+    return pages;
   }
 
   onVideoClick(video: Video): void {
@@ -105,3 +148,4 @@ export class TrendingComponent implements OnInit, OnDestroy {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
+

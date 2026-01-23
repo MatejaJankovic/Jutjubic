@@ -210,27 +210,58 @@ $border-color: #303030;
   }
 }
 
-// Back to Top Button
-.back-to-top {
-  position: fixed;
-  bottom: 32px;
-  right: 32px;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background-color: $bg-card;
-  border: 1px solid $border-color;
-  color: $text-primary;
-  cursor: pointer;
+// Pagination
+.pagination {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  z-index: 100;
+  gap: 8px;
+  margin-top: 48px;
+  padding: 24px 0;
 
-  &:hover {
-    background-color: $bg-hover;
-    transform: translateY(-2px);
+  .pagination-btn {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 8px;
+    background-color: $bg-card;
+    border: 1px solid $border-color;
+    color: $text-primary;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+
+    &:hover:not(:disabled) {
+      background-color: $bg-hover;
+      border-color: $text-tertiary;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &.page-number {
+      &.active {
+        background-color: $accent-red;
+        border-color: $accent-red;
+        color: $text-primary;
+      }
+    }
+
+    svg {
+      display: block;
+    }
+  }
+
+  .pagination-info {
+    margin-left: 16px;
+    color: $text-secondary;
+    font-size: 14px;
   }
 }
 

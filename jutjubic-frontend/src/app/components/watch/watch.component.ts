@@ -1,5 +1,5 @@
 
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { VideoService } from '../../services/video.service';
@@ -29,7 +29,8 @@ export class WatchComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private videoService: VideoService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {
     const nav = history.state;
     if (nav?.video) {
@@ -60,9 +61,11 @@ export class WatchComponent implements OnInit, OnDestroy {
           if (!video) return;
           this.video = video;
           this.loading = false;
+          this.cdr.detectChanges();
           this.incrementViews(video.id);
         },
-        error: () => {
+        error: (err) => {
+          console.error('Error loading video:', err);
           this.error = true;
           this.loading = false;
         }

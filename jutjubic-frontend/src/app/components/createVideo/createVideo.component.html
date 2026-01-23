@@ -21,9 +21,14 @@
     Izabrana slika: {{ thumbnailName }}
   </div>
 
+  <label>Lokacija videa (klikni na mapu)</label>
+  <div id="location-map" class="location-map"></div>
 
+  <div *ngIf="latitude && longitude" class="location-info">
+    📍 Odabrana lokacija: {{ latitude.toFixed(4) }}, {{ longitude.toFixed(4) }}
+  </div>
 
-  <input type="text" placeholder="Lokacija (opciono)" [(ngModel)]="location" name="location" />
+  <input type="text" placeholder="Opis lokacije (opciono)" [(ngModel)]="location" name="location" />
 
   <button type="submit" [disabled]="uploading">
     Postavi video

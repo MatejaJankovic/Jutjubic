@@ -8,7 +8,8 @@ import { WatchComponent } from './components/watch/watch.component';
 import { TrendingComponent } from './components/trending/trending.component';
 import { authGuard,guestGuard } from './guards/auth.guard';
 import { CreateVideoComponent } from './components/createVideo/createVideo.component';
-import { ProfileComponent } from './components/profile/profile.component'
+import { ProfileComponent } from './components/profile/profile.component';
+import { MapComponent } from './components/map/map.component';
 
 export const routes: Routes = [
   {
@@ -31,6 +32,10 @@ export const routes: Routes = [
       {
         path: 'trending',
         component: TrendingComponent,
+      },
+      {
+        path: 'map',
+        component: MapComponent,
       },
     ],
   },

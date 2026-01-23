@@ -30,6 +30,8 @@ public class VideoDTO {
     private String userLastName;
     private LocalDateTime createdAt;
     private boolean likedByCurrentUser;
+    private Double latitude;
+    private Double longitude;
 
     @JsonProperty("isLikedByCurrentUser")
     public boolean isLikedByCurrentUser() {
@@ -57,6 +59,8 @@ public class VideoDTO {
                 .userFirstName(video.getUser().getFirstName())
                 .userLastName(video.getUser().getLastName())
                 .createdAt(video.getCreatedAt())
+                .latitude(video.getLatitude())
+                .longitude(video.getLongitude())
                 .build();
     }
 }
