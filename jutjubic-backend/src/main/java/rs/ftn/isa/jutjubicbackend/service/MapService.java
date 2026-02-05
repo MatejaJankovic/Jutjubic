@@ -207,7 +207,7 @@ public class MapService {
     /**
      * Converts tile Y coordinate to latitude.
      */
-    private double tileToLat(int y, int zoom) {
+    public double tileToLat(int y, int zoom) {
         double n = Math.PI - 2.0 * Math.PI * y / Math.pow(2, zoom);
         return Math.toDegrees(Math.atan(Math.sinh(n)));
     }
@@ -215,7 +215,7 @@ public class MapService {
     /**
      * Converts tile X coordinate to longitude.
      */
-    private double tileToLng(int x, int zoom) {
+    public double tileToLng(int x, int zoom) {
         return x / Math.pow(2, zoom) * 360.0 - 180.0;
     }
 }

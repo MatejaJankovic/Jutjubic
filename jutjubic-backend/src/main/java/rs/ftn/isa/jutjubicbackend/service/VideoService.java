@@ -226,11 +226,14 @@ public class VideoService {
 
             videoRepository.save(videoEntity);
 
-            // Konvertuj lat/lng u tile koordinatu za zoom nivo mape
             var tile = mapService.latLngToTile(videoEntity.getLatitude(), videoEntity.getLongitude(), 12); // npr. zoom 12
-            // Napravi key koji je isti kao kod @Cacheable u MapService
-            String cacheKey = tile.x + "_" + tile.y + "_" + tile.zoom;
-            // Evikuj samo taj tile
+
+            double north = mapService.tileToLat(tile.y, tile.zoom);
+            double south = mapService.tileToLat(tile.y + 1, tile.zoom);
+            double west  = mapService.tileToLng(tile.x, tile.zoom);
+            double east  = mapService.tileToLng(tile.x + 1, tile.zoom);
+
+            String cacheKey = north + "_" + south + "_" + east + "_" + west + "_" + tile.zoom;
             mapService.evictTileCache(cacheKey);
 
 
