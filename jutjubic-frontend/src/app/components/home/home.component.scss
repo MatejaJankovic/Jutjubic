@@ -118,6 +118,62 @@ $border-color: #303030;
   color: white;
 }
 
+.premiere-overlay {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+
+  .premiere-badge {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.live-overlay {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+
+  .live-badge {
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    animation: livePulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes livePulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.4);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 2px 12px rgba(255, 0, 0, 0.6);
+  }
+}
+
 .video-info {
   display: flex;
   gap: 12px;

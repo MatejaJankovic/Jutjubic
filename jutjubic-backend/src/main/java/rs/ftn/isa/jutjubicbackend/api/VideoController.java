@@ -2,6 +2,8 @@ package rs.ftn.isa.jutjubicbackend.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,10 @@ import rs.ftn.isa.jutjubicbackend.service.VideoService;
 public class VideoController {
 
     private final VideoService videoService;
+
+    private static final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     @GetMapping
     public ResponseEntity<VideoPageResponse> getAllVideos(
@@ -72,7 +78,7 @@ public class VideoController {
             @RequestPart("video") MultipartFile video,
             @RequestPart("thumbnail") MultipartFile thumbnail) throws JsonProcessingException {
 
-        CreateVideoRequest request = new ObjectMapper().readValue(dataJson, CreateVideoRequest.class);
+        CreateVideoRequest request = objectMapper.readValue(dataJson, CreateVideoRequest.class);
         VideoDTO created = videoService.createVideo(request, video, thumbnail);
         return ResponseEntity.ok(created);
     }

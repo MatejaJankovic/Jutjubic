@@ -40,6 +40,20 @@
               <path fill="currentColor" d="M8 5v14l11-7z"/>
             </svg>
           </div>
+
+          <!-- Premiere overlay -->
+          @if (isPremiereVideo(video)) {
+          <div class="premiere-overlay">
+            <span class="premiere-badge">PREMIERE</span>
+          </div>
+          }
+
+          <!-- Live overlay -->
+          @if (isLiveVideo(video)) {
+          <div class="live-overlay">
+            <span class="live-badge">LIVE</span>
+          </div>
+          }
         </div>
 
         <div class="video-info">

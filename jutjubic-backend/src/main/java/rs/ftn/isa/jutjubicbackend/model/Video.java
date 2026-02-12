@@ -72,6 +72,11 @@ public class Video {
     @Column(name = "longitude")
     private Double longitude;
 
+    // Premiere scheduling - only scheduledAt is stored, status is calculated dynamically
+    @Column(name = "premiere_scheduled_at")
+    private LocalDateTime premiereScheduledAt;
+
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

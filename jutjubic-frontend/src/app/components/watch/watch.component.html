@@ -15,14 +15,61 @@
       <div class="video-section">
 
         <div class="video-player">
-          <video
-            *ngIf="video.videoUrl"
-            controls
-            autoplay
-            preload="auto"
-            [src]="environment.apiUrl + video.videoUrl"
-            [poster]="video.thumbnailUrl ? environment.apiUrl + video.thumbnailUrl : ''">
-          </video>
+          <!-- Premiere Scheduled State - Show Countdown -->
+          <div *ngIf="isPremiereMode && premiereStatus?.status === 'SCHEDULED'" class="premiere-waiting">
+            <div class="premiere-thumbnail" [style.background-image]="'url(' + environment.apiUrl + video.thumbnailUrl + ')'">
+              <div class="premiere-overlay">
+                <div class="premiere-badge">PREMIERE</div>
+                <div class="countdown-container">
+                  <h2>Video počinje za</h2>
+                  <div class="countdown-timer">{{ countdownDisplay }}</div>
+                  <p class="premiere-date" *ngIf="video.premiereScheduledAt">
+                    Zakazano za: {{ video.premiereScheduledAt | date:'dd.MM.yyyy. HH:mm' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Premiere Live State - Show Video with LIVE badge -->
+          <div *ngIf="!isPremiereMode || premiereStatus?.status === 'LIVE' || premiereStatus?.status === 'ENDED'" class="video-wrapper" [class.seeking-disabled]="isSeekingDisabled">
+            <video
+              #videoPlayer
+              *ngIf="video.videoUrl"
+              controls
+              muted
+              preload="auto"
+              [src]="environment.apiUrl + video.videoUrl"
+              [poster]="video.thumbnailUrl ? environment.apiUrl + video.thumbnailUrl : ''"
+              (loadedmetadata)="onVideoReady()"
+              (click)="onVideoClick()"
+              (seeking)="onSeeking()"
+              (timeupdate)="onSeeking()">
+            </video>
+
+            <!-- Live badge overlay -->
+            <div *ngIf="premiereStatus?.status === 'LIVE'" class="live-indicator">
+              <span class="live-badge">LIVE</span>
+              <span class="viewer-count" *ngIf="premiereStatus?.viewerCount">
+                {{ premiereStatus?.viewerCount }} gleda
+              </span>
+            </div>
+
+            <!-- Seeking disabled notice -->
+            <div *ngIf="isSeekingDisabled && premiereStatus?.status === 'LIVE'" class="seeking-disabled-notice">
+              <span>Premotavanje nije dozvoljeno tokom LIVE prenosa</span>
+            </div>
+
+            <!-- Click to play message when autoplay is blocked or when live video needs user interaction -->
+            <div *ngIf="premiereStatus?.status === 'LIVE' && showClickToPlay" class="click-to-play-message">
+              <div class="play-button-overlay" (click)="onVideoClick()">
+                <svg viewBox="0 0 24 24" width="48" height="48">
+                  <path fill="white" d="M8 5v14l11-7z"/>
+                </svg>
+                <span>Kliknite za pokretanje live premiere</span>
+              </div>
+            </div>
+          </div>
 
           <div *ngIf="!video.videoUrl" class="video-placeholder">
             <svg viewBox="0 0 24 24" width="80" height="80">

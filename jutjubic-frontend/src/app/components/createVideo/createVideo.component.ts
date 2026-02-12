@@ -23,6 +23,11 @@ export class CreateVideoComponent implements OnInit, OnDestroy {
   latitude: number | null = null;
   longitude: number | null = null;
 
+  // Premiere fields
+  isPremiereEnabled = false;
+  premiereDate = '';
+  premiereTime = '';
+
   uploading = false;
   errorMessage = '';
 
@@ -144,12 +149,40 @@ export class CreateVideoComponent implements OnInit, OnDestroy {
     this.thumbnailName = this.thumbnailFile ? this.thumbnailFile.name : '';
   }
 
+  getMinDate(): string {
+    const now = new Date();
+    return now.toISOString().split('T')[0];
+  }
+
+  getMinTime(): string {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 15);
+    return now.toTimeString().slice(0, 5);
+  }
+
 
   submit() {
     if (!this.title || !this.description || !this.videoFile || !this.thumbnailFile) {
         this.errorMessage = 'Naslov, opis, video i thumbnail su obavezni.';
         return;
+    }
+
+    // Premiere validation
+    if (this.isPremiereEnabled) {
+      if (!this.premiereDate || !this.premiereTime) {
+        this.errorMessage = 'Morate izabrati datum i vreme za premiere.';
+        return;
       }
+
+      const premiereDateTime = new Date(`${this.premiereDate}T${this.premiereTime}:00`);
+      const now = new Date();
+      const minTime = new Date(now.getTime() + 2 * 60 * 1000); // minimum 2 minutes in future
+
+      if (premiereDateTime < minTime) {
+        this.errorMessage = 'Premiere mora biti zakazana najmanje 2 minuta u budućnosti.';
+        return;
+      }
+    }
 
     const meta = {
       title: this.title,
@@ -157,7 +190,10 @@ export class CreateVideoComponent implements OnInit, OnDestroy {
       tags: this.tags.split(',').map(t => t.trim()),
       location: this.location,
       latitude: this.latitude,
-      longitude: this.longitude
+      longitude: this.longitude,
+      premiereScheduledAt: this.isPremiereEnabled && this.premiereDate && this.premiereTime
+        ? `${this.premiereDate}T${this.premiereTime}:00`
+        : null
     };
 
     const formData = new FormData();

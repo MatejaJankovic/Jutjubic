@@ -54,6 +54,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   onVideoClick(video: Video): void {
+
     this.router.navigate(
       ['/watch', video.id],
       { state: { video } }
@@ -184,6 +185,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     const video = event.target as HTMLVideoElement;
     video.pause();
     video.currentTime = 0;
+  }
+
+  isPremiereVideo(video: Video): boolean {
+    return video.premiereStatus === 'SCHEDULED';
+  }
+
+  isLiveVideo(video: Video): boolean {
+    return video.premiereStatus === 'LIVE';
   }
 }
 

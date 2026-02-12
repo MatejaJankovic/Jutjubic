@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rs.ftn.isa.jutjubicbackend.service.TestDataGenerator;
+import rs.ftn.isa.jutjubicbackend.service.VideoService;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -17,6 +18,7 @@ import rs.ftn.isa.jutjubicbackend.service.TestDataGenerator;
 public class AdminController {
 
     private final TestDataGenerator testDataGenerator;
+    private final VideoService videoService;
 
     @PostMapping("/generate-test-videos")
     @Operation(summary = "Generate test videos",
@@ -43,6 +45,20 @@ public class AdminController {
         return ResponseEntity.ok(
                 MessageResponse.builder()
                         .message("Successfully deleted all test videos")
+                        .build()
+        );
+    }
+
+    @PostMapping("/update-video-durations")
+    @Operation(summary = "Update video durations",
+               description = "Updates duration_seconds for all existing videos that have null duration")
+    public ResponseEntity<MessageResponse> updateVideoDurations() {
+        int updated = videoService.updateAllVideoDurations();
+
+        return ResponseEntity.ok(
+                MessageResponse.builder()
+                        .message("Successfully updated durations for " + updated + " videos")
+                        .count(updated)
                         .build()
         );
     }
