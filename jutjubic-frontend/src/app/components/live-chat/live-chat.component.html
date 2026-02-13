@@ -1,0 +1,77 @@
+<div class="live-chat-container">
+  <div class="chat-header">
+    <div class="header-title">
+      <svg viewBox="0 0 24 24" width="20" height="20">
+        <path fill="currentColor" d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
+      </svg>
+      <span>Live Chat</span>
+    </div>
+    <div class="connection-status" [class.connected]="connected">
+      <span class="status-dot"></span>
+      <span>{{ connected ? 'Povezan' : 'Povezivanje...' }}</span>
+    </div>
+  </div>
+
+  <div class="messages-container" #messagesContainer>
+    <div class="messages-list">
+      @if (messages.length === 0) {
+        <div class="no-messages">
+          <svg viewBox="0 0 24 24" width="48" height="48">
+            <path fill="currentColor" d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
+          </svg>
+          <p>Budite prvi koji će poslati poruku!</p>
+        </div>
+      } @else {
+        @for (message of messages; track message.timestamp) {
+          @if (isSystemMessage(message)) {
+            <div class="system-message">
+              <span>{{ getSystemMessageText(message) }}</span>
+            </div>
+          } @else {
+            <div class="chat-message">
+              <div class="message-avatar">{{ getUserInitials(message) }}</div>
+              <div class="message-content">
+                <div class="message-header">
+                  <span class="message-author">{{ getFormattedUsername(message) }}</span>
+                  <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+                </div>
+                <div class="message-text">{{ message.message }}</div>
+              </div>
+            </div>
+          }
+        }
+      }
+    </div>
+  </div>
+
+  <div class="chat-input-container">
+    @if (!connected) {
+      <div class="input-disabled-message">
+        <span>Povezivanje sa chat-om...</span>
+      </div>
+    } @else {
+      <form (ngSubmit)="sendMessage()" class="chat-form">
+        <input
+          type="text"
+          [(ngModel)]="newMessage"
+          name="message"
+          placeholder="Pošaljite poruku..."
+          class="chat-input"
+          maxlength="500"
+          (keypress)="onKeyPress($event)"
+          [disabled]="!connected"
+        />
+        <button
+          type="submit"
+          class="send-button"
+          [disabled]="!newMessage.trim() || !connected"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </form>
+    }
+  </div>
+</div>
+

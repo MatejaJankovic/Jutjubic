@@ -100,6 +100,95 @@
     font-weight: 500;
   }
 
+  // Premiere Section Styles
+  .premiere-section {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #e9ecef;
+
+    .premiere-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #333;
+
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #ff0000;
+        cursor: pointer;
+      }
+
+      span {
+        font-size: 16px;
+      }
+    }
+
+    .premiere-datetime {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #dee2e6;
+    }
+
+    .premiere-info {
+      background-color: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #856404;
+      margin-bottom: 16px;
+    }
+
+    .datetime-inputs {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+
+      .input-group {
+        flex: 1;
+        min-width: 150px;
+
+        label {
+          display: block;
+          margin-bottom: 6px;
+          font-weight: 600;
+          color: #333;
+        }
+
+        input[type="date"],
+        input[type="time"] {
+          width: 100%;
+          padding: 12px 16px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 16px;
+          background-color: #fff;
+          transition: all 0.2s ease;
+
+          &:focus {
+            border-color: #ff0000;
+            box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+          }
+        }
+      }
+    }
+
+    .premiere-preview {
+      margin-top: 16px;
+      background-color: #d4edda;
+      border-left: 4px solid #28a745;
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #155724;
+      font-weight: 500;
+    }
+  }
+
   @media (max-width: 640px) {
     padding: 20px;
     gap: 15px;

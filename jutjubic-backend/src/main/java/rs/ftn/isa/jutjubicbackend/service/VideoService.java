@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -209,6 +210,9 @@ public class VideoService {
             uploadWithTimeout(video, videoPath);
             uploadWithTimeout(thumbnail, thumbPath);
 
+            // Extract video duration
+            Integer durationSeconds = extractVideoDuration(videoPath);
+
             Video videoEntity = Video.builder()
                     .title(request.getTitle())
                     .description(request.getDescription())
@@ -222,6 +226,8 @@ public class VideoService {
                     .viewCount(0L)
                     .likeCount(0L)
                     .commentCount(0L)
+                    .durationSeconds(durationSeconds)
+                    .premiereScheduledAt(request.getPremiereScheduledAt())
                     .build();
 
             videoRepository.save(videoEntity);
@@ -278,6 +284,83 @@ public class VideoService {
         if (video.getSize() > 200 * 1024 * 1024) {
             throw new IllegalArgumentException("Video ne sme biti veći od 200MB");
         }
+    }
+
+    /**
+     * Extract video duration in seconds using FFmpeg's ffprobe
+     * Requires FFmpeg to be installed on the system
+     */
+    private Integer extractVideoDuration(Path videoPath) {
+        ProcessBuilder processBuilder = new ProcessBuilder(
+            "ffprobe",
+            "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1",
+            videoPath.toAbsolutePath().toString()
+        );
+
+        try {
+            Process process = processBuilder.start();
+
+            try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(process.getInputStream()))) {
+
+                String durationStr = reader.readLine();
+                int exitCode = process.waitFor();
+
+                if (exitCode == 0 && durationStr != null && !durationStr.trim().isEmpty()) {
+                    double durationSeconds = Double.parseDouble(durationStr.trim());
+                    return (int) Math.ceil(durationSeconds);
+                } else {
+                    System.err.println("ffprobe failed with exit code: " + exitCode);
+                }
+            }
+        } catch (java.io.IOException e) {
+            System.err.println("FFmpeg not found. Please install FFmpeg: https://ffmpeg.org/download.html");
+            System.err.println("Error: " + e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.err.println("Duration extraction interrupted: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid duration format: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Update duration for all existing videos that have null duration
+     */
+    @Transactional
+    public int updateAllVideoDurations() {
+        List<Video> videos = videoRepository.findAll();
+        int updated = 0;
+
+        Path base = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Path videoDir = base.resolve("videos");
+
+        for (Video video : videos) {
+            if (video.getDurationSeconds() == null && video.getVideoUrl() != null) {
+                try {
+                    String filename = Paths.get(video.getVideoUrl()).getFileName().toString();
+                    Path videoPath = videoDir.resolve(filename);
+
+                    if (Files.exists(videoPath)) {
+                        Integer duration = extractVideoDuration(videoPath);
+                        if (duration != null) {
+                            video.setDurationSeconds(duration);
+                            videoRepository.save(video);
+                            updated++;
+                            System.out.println("Updated duration for video ID " + video.getId() + ": " + duration + " seconds");
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Failed to update duration for video ID " + video.getId() + ": " + e.getMessage());
+                }
+            }
+        }
+
+        return updated;
     }
 
     @Cacheable(value = "thumbnails", key = "#id")

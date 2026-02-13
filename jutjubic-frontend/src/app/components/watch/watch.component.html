@@ -11,96 +11,151 @@
       <a routerLink="/" class="back-link">Povratak na početnu</a>
     </div>
   } @else {
-    <div class="watch-content">
+    <div class="watch-content" [class.live-mode]="isPremiereMode && (premiereStatus?.status === 'SCHEDULED' || premiereStatus?.status === 'LIVE')">
       <div class="video-section">
 
-        <div class="video-player">
-          <video
-            *ngIf="video.videoUrl"
-            controls
-            autoplay
-            preload="auto"
-            [src]="environment.apiUrl + video.videoUrl"
-            [poster]="video.thumbnailUrl ? environment.apiUrl + video.thumbnailUrl : ''">
-          </video>
-
-          <div *ngIf="!video.videoUrl" class="video-placeholder">
-            <svg viewBox="0 0 24 24" width="80" height="80">
-              <path fill="currentColor" d="M8 5v14l11-7z"/>
-            </svg>
-            <p>Video će uskoro biti dostupan</p>
-          </div>
-        </div>
-        <!-- Video Info -->
-        <div class="video-info">
-          <h1 class="video-title">{{ video.title }}</h1>
-
-          <div class="video-stats">
-            <div class="stats-left">
-              <span class="view-count">{{ formatViewCount(video.viewCount) }} pregleda</span>
-              <span class="separator">•</span>
-              <span class="date">{{ formatRelativeTime(video.createdAt) }}</span>
+        <!-- Video Player + Info (always in first column) -->
+        <div class="video-content-wrapper">
+          <div class="video-player">
+            <!-- Premiere Scheduled State - Show Countdown -->
+            <div *ngIf="isPremiereMode && premiereStatus?.status === 'SCHEDULED'" class="premiere-waiting">
+              <div class="premiere-thumbnail" [style.background-image]="'url(' + environment.apiUrl + video.thumbnailUrl + ')'">
+                <div class="premiere-overlay">
+                  <div class="premiere-badge">PREMIERE</div>
+                  <div class="countdown-container">
+                    <h2>Video počinje za</h2>
+                    <div class="countdown-timer">{{ countdownDisplay }}</div>
+                    <p class="premiere-date" *ngIf="video.premiereScheduledAt">
+                      Zakazano za: {{ video.premiereScheduledAt | date:'dd.MM.yyyy. HH:mm' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="stats-right">
-              <button class="action-btn" [class.liked]="video.isLikedByCurrentUser" (click)="handleLikeClick()">
-                <svg viewBox="0 0 24 24" width="24" height="24">
-                  <path [attr.fill]="video.isLikedByCurrentUser ? '#065fd4' : 'currentColor'" d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
-                </svg>
-                <span>{{ formatViewCount(video.likeCount) }}</span>
-              </button>
-              <button class="action-btn">
-                <svg viewBox="0 0 24 24" width="24" height="24">
-                  <path fill="currentColor" d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
-                </svg>
-                <span>Sačuvaj</span>
-              </button>
+
+            <!-- Premiere Live State - Show Video with LIVE badge -->
+            <div *ngIf="!isPremiereMode || premiereStatus?.status === 'LIVE' || premiereStatus?.status === 'ENDED'" class="video-wrapper" [class.seeking-disabled]="isSeekingDisabled">
+              <video
+                #videoPlayer
+                *ngIf="video.videoUrl"
+                controls
+                muted
+                preload="auto"
+                [src]="environment.apiUrl + video.videoUrl"
+                [poster]="video.thumbnailUrl ? environment.apiUrl + video.thumbnailUrl : ''"
+                (loadedmetadata)="onVideoReady()"
+                (click)="onVideoClick()"
+                (seeking)="onSeeking()"
+                (timeupdate)="onSeeking()">
+              </video>
+
+              <!-- Live badge overlay -->
+              <div *ngIf="premiereStatus?.status === 'LIVE'" class="live-indicator">
+                <span class="live-badge">LIVE</span>
+                <span class="viewer-count" *ngIf="premiereStatus?.viewerCount">
+                  {{ premiereStatus?.viewerCount }} gleda
+                </span>
+              </div>
+
+              <!-- Seeking disabled notice -->
+              <div *ngIf="isSeekingDisabled && premiereStatus?.status === 'LIVE'" class="seeking-disabled-notice">
+                <span>Premotavanje nije dozvoljeno tokom LIVE prenosa</span>
+              </div>
+
+              <!-- Click to play message when autoplay is blocked or when live video needs user interaction -->
+              <div *ngIf="premiereStatus?.status === 'LIVE' && showClickToPlay" class="click-to-play-message">
+                <div class="play-button-overlay" (click)="onVideoClick()">
+                  <svg viewBox="0 0 24 24" width="48" height="48">
+                    <path fill="white" d="M8 5v14l11-7z"/>
+                  </svg>
+                  <span>Kliknite za pokretanje live premiere</span>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div class="channel-info">
-            <div class="channel-avatar">{{ getChannelInitials() }}</div>
-            <div class="channel-details">
-              <a class="channel-name" [routerLink]="['/users', video.username]">
-                {{ video.userFirstName }} {{ video.userLastName }}
-              </a>
-              <a class="channel-username" [routerLink]="['/users', video.username]">
-                &#64;{{ video.username }}
-              </a>
-            </div>
-          </div>
-
-          @if (video.description) {
-            <div class="video-description">
-              <p>{{ video.description }}</p>
-            </div>
-          }
-        </div>
-
-
-        <div class="comments-section">
-
-
-          <ng-container *ngIf="videoId; else commentsPlaceholder">
-            <div class="comments-shell">
-              <app-comment-form [videoId]="videoId!" (posted)="onCommentPosted()"></app-comment-form>
-              <app-comment-list [videoId]="videoId!" [refreshToken]="commentRefreshToken"></app-comment-list>
-            </div>
-          </ng-container>
-
-          <ng-template #commentsPlaceholder>
-            <div class="comments-placeholder">
-              <svg viewBox="0 0 24 24" width="48" height="48">
-                <path fill="currentColor" d="M21 6h-2v9H5v2c0 1.1.9 2 2 2h12l4 4V8c0-1.1-.9-2-2-2z"/>
+            <div *ngIf="!video.videoUrl" class="video-placeholder">
+              <svg viewBox="0 0 24 24" width="80" height="80">
+                <path fill="currentColor" d="M8 5v14l11-7z"/>
               </svg>
-              <p>Komentarisanje će uskoro biti dostupno</p>
+              <p>Video će uskoro biti dostupan</p>
             </div>
-          </ng-template>
+          </div>
+
+          <!-- Video Info -->
+          <div class="video-info">
+            <h1 class="video-title">{{ video.title }}</h1>
+
+            <div class="video-stats">
+              <div class="stats-left">
+                <span class="view-count">{{ formatViewCount(video.viewCount) }} pregleda</span>
+                <span class="separator">•</span>
+                <span class="date">{{ formatRelativeTime(video.createdAt) }}</span>
+              </div>
+              <div class="stats-right">
+                <button class="action-btn" [class.liked]="video.isLikedByCurrentUser" (click)="handleLikeClick()">
+                  <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path [attr.fill]="video.isLikedByCurrentUser ? '#065fd4' : 'currentColor'" d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
+                  </svg>
+                  <span>{{ formatViewCount(video.likeCount) }}</span>
+                </button>
+                <button class="action-btn">
+                  <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="currentColor" d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+                  </svg>
+                  <span>Sačuvaj</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="channel-info">
+              <div class="channel-avatar">{{ getChannelInitials() }}</div>
+              <div class="channel-details">
+                <a class="channel-name" [routerLink]="['/users', video.username]">
+                  {{ video.userFirstName }} {{ video.userLastName }}
+                </a>
+                <a class="channel-username" [routerLink]="['/users', video.username]">
+                  &#64;{{ video.username }}
+                </a>
+              </div>
+            </div>
+
+            @if (video.description) {
+              <div class="video-description">
+                <p>{{ video.description }}</p>
+              </div>
+            }
+          </div>
+
+          <!-- Comments Section (shown for regular videos or after premiere ENDED) -->
+          <div class="comments-section" *ngIf="!isPremiereMode || premiereStatus?.status === 'ENDED'">
+            <ng-container *ngIf="videoId; else commentsPlaceholder">
+              <div class="comments-shell">
+                <app-comment-form [videoId]="videoId!" (posted)="onCommentPosted()"></app-comment-form>
+                <app-comment-list [videoId]="videoId!" [refreshToken]="commentRefreshToken"></app-comment-list>
+              </div>
+            </ng-container>
+
+            <ng-template #commentsPlaceholder>
+              <div class="comments-placeholder">
+                <svg viewBox="0 0 24 24" width="48" height="48">
+                  <path fill="currentColor" d="M21 6h-2v9H5v2c0 1.1.9 2 2 2h12l4 4V8c0-1.1-.9-2-2-2z"/>
+                </svg>
+                <p>Komentarisanje će uskoro biti dostupno</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Live Chat Section (shown during SCHEDULED and LIVE premiere, in second column) -->
+        <div class="live-chat-section" *ngIf="isPremiereMode && (premiereStatus?.status === 'SCHEDULED' || premiereStatus?.status === 'LIVE')">
+          <app-live-chat [videoId]="videoId!"></app-live-chat>
         </div>
 
       </div>
 
 
-      <aside class="sidebar-section">
+      <!-- Sidebar for regular videos and after premiere ends -->
+      <aside class="sidebar-section" *ngIf="!isPremiereMode || premiereStatus?.status === 'ENDED'">
         <h3>Preporučeni video snimci</h3>
         <div class="suggested-placeholder">
           <p>Preporučeni video snimci će biti dostupni uskoro</p>

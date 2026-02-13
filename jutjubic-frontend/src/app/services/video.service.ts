@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Video, VideoPageResponse } from '../models/video.model';
+import { Video, VideoPageResponse, PremiereStatus } from '../models/video.model';
 
 @Injectable({
   providedIn: 'root',
@@ -98,6 +98,36 @@ export class VideoService {
         }
       }
     );
+  }
+
+  // Premiere methods
+  getPremiereStatus(videoId: number): Observable<PremiereStatus> {
+    return this.http.get<PremiereStatus>(`${this.API_URL}/${videoId}/premiere-status`);
+  }
+
+  canAccessVideo(videoId: number): Observable<boolean> {
+    return this.http.get<boolean>(`${this.API_URL}/${videoId}/can-access`);
+  }
+
+  joinPremiere(videoId: number): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/${videoId}/premiere-join`, {});
+  }
+
+  leavePremiere(videoId: number): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/${videoId}/premiere-leave`, {});
+  }
+
+
+  forceEndPremiere(videoId: number): Observable<PremiereStatus> {
+    return this.http.post<PremiereStatus>(`${this.API_URL}/${videoId}/premiere-end`, {});
+  }
+
+  formatCountdown(seconds: number): string {
+    if (seconds <= 0) return '00:00:00';
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
 }
 

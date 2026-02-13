@@ -30,6 +30,43 @@
 
   <input type="text" placeholder="Opis lokacije (opciono)" [(ngModel)]="location" name="location" />
 
+  <!-- Premiere Scheduling Section -->
+  <div class="premiere-section">
+    <label class="premiere-checkbox">
+      <input type="checkbox" [(ngModel)]="isPremiereEnabled" name="isPremiereEnabled" />
+      <span>Zakaži Premiere</span>
+    </label>
+
+    <div *ngIf="isPremiereEnabled" class="premiere-datetime">
+      <p class="premiere-info">Premiere režim - Video će biti dostupan za gledanje tek u zakazano vreme. Svi gledaoci će gledati sinhronizovano.</p>
+
+      <div class="datetime-inputs">
+        <div class="input-group">
+          <label>Datum</label>
+          <input
+            type="date"
+            [(ngModel)]="premiereDate"
+            name="premiereDate"
+            [min]="getMinDate()"
+            required />
+        </div>
+
+        <div class="input-group">
+          <label>Vreme</label>
+          <input
+            type="time"
+            [(ngModel)]="premiereTime"
+            name="premiereTime"
+            required />
+        </div>
+      </div>
+
+      <p *ngIf="premiereDate && premiereTime" class="premiere-preview">
+        📅 Premiere zakazana za: {{ premiereDate }} u {{ premiereTime }}
+      </p>
+    </div>
+  </div>
+
   <button type="submit" [disabled]="uploading">
     Postavi video
   </button>
