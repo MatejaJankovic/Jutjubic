@@ -7,6 +7,7 @@ import { Video, PremiereStatus } from '../../models/video.model';
 import { Subscription, filter, distinctUntilChanged, map, of, switchMap, tap, interval } from 'rxjs';
 import { CommentFormComponent } from '../comments/comment-form.component';
 import { CommentListComponent } from '../comments/comment-list.component';
+import { LiveChatComponent } from '../live-chat/live-chat.component';
 import { environment } from '../../env/environment';
 import { AuthService } from '../../services/auth.service';
 
@@ -14,7 +15,7 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-watch',
   standalone: true,
   imports: [CommonModule, RouterLink, CommentFormComponent,
-    CommentListComponent],
+    CommentListComponent, LiveChatComponent],
   templateUrl: './watch.component.html',
   styleUrls: ['./watch.component.scss'],
 })

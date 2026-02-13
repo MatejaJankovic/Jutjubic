@@ -24,6 +24,11 @@ $border-color: #303030;
   grid-template-columns: 1fr 400px;
   gap: 24px;
 
+  &.live-mode {
+    // In live mode, remove sidebar and video section spans full width
+    grid-template-columns: 1fr;
+  }
+
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
   }
@@ -32,6 +37,17 @@ $border-color: #303030;
 // Video Player
 .video-section {
   min-width: 0;
+
+  .watch-content.live-mode & {
+    // In live mode, create grid for video player and chat side by side
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+
+    @media (max-width: 1200px) {
+      grid-template-columns: 1fr;
+    }
+  }
 }
 
 .video-player {
@@ -205,6 +221,17 @@ $border-color: #303030;
     font-size: 16px;
     font-weight: 500;
     margin: 0 0 24px 0;
+  }
+}
+
+// Live Chat Section
+.live-chat-section {
+  height: calc(100vh - 200px);
+  min-height: 500px;
+
+  @media (max-width: 1200px) {
+    height: 600px;
+    margin-top: 24px;
   }
 }
 
