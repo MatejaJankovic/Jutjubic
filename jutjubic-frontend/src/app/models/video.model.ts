@@ -41,3 +41,14 @@ export interface VideoPageResponse {
   hasNext: boolean;
   hasPrevious: boolean;
 }
+
+export interface PopularVideoItem {
+  video: Video;
+  score: number;
+}
+
+export interface PopularVideosResponse {
+  pipelineRunAt: string;
+  topVideos: PopularVideoItem[];
+}
+

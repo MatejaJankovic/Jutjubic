@@ -18,9 +18,11 @@ import rs.ftn.isa.jutjubicbackend.dto.VideoPageResponse;
 import rs.ftn.isa.jutjubicbackend.model.User;
 import rs.ftn.isa.jutjubicbackend.model.Video;
 import rs.ftn.isa.jutjubicbackend.model.VideoLike;
+import rs.ftn.isa.jutjubicbackend.model.VideoView;
 import rs.ftn.isa.jutjubicbackend.repository.UserRepository;
 import rs.ftn.isa.jutjubicbackend.repository.VideoLikeRepository;
 import rs.ftn.isa.jutjubicbackend.repository.VideoRepository;
+import rs.ftn.isa.jutjubicbackend.repository.VideoViewRepository;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,6 +43,8 @@ public class VideoService {
     private final CacheManager cacheManager;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private VideoViewRepository videoViewRepository;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -122,6 +126,16 @@ public class VideoService {
     public Optional<VideoDTO> incrementViewCount(Long id) {
         int updatedRows = videoRepository.incrementViewCountById(id);
         if (updatedRows > 0) {
+            // Log the view for ETL pipeline
+            Video video = videoRepository.findById(id).orElse(null);
+            if (video != null) {
+                User currentUser = getCurrentUserOrNull();
+                VideoView videoView = VideoView.builder()
+                        .video(video)
+                        .user(currentUser)
+                        .build();
+                videoViewRepository.save(videoView);
+            }
             return videoRepository.findById(id).map(this::toVideoDTO);
         }
         return Optional.empty();
