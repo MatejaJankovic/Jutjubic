@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Video, VideoPageResponse, PremiereStatus } from '../models/video.model';
+import { Video, VideoPageResponse, PremiereStatus, PopularVideosResponse } from '../models/video.model';
 
 @Injectable({
   providedIn: 'root',
@@ -43,6 +43,10 @@ export class VideoService {
       .set('page', page.toString())
       .set('size', size.toString());
     return this.http.get<VideoPageResponse>(`${this.API_URL}/trending`, { params });
+  }
+
+  getPopularVideos(): Observable<PopularVideosResponse> {
+    return this.http.get<PopularVideosResponse>('http://localhost:8080/api/etl/popular-videos');
   }
 
   formatDuration(seconds: number): string {

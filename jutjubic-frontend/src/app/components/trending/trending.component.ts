@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { VideoService } from '../../services/video.service';
-import { Video, VideoPageResponse } from '../../models/video.model';
+import { Video, VideoPageResponse, PopularVideosResponse, PopularVideoItem } from '../../models/video.model';
 import { Subscription } from 'rxjs';
 import { environment } from '../../env/environment';
 
@@ -15,6 +15,8 @@ import { environment } from '../../env/environment';
 })
 export class TrendingComponent implements OnInit, OnDestroy {
   videos: Video[] = [];
+  popularVideos: PopularVideoItem[] = [];
+  popularVideosRunAt: string | null = null;
   loading = false;
   currentPage = 0;
   totalPages = 0;
@@ -30,6 +32,7 @@ export class TrendingComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.loadPopularVideos();
     this.loadVideos();
   }
 
@@ -55,6 +58,22 @@ export class TrendingComponent implements OnInit, OnDestroy {
         error: () => {
           this.loading = false;
           this.cdr.detectChanges();
+        }
+      })
+    );
+  }
+
+  loadPopularVideos(): void {
+    this.subscription.add(
+      this.videoService.getPopularVideos().subscribe({
+        next: (response: PopularVideosResponse) => {
+          this.popularVideos = response.topVideos;
+          this.popularVideosRunAt = response.pipelineRunAt;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Failed to load popular videos:', err);
+          this.popularVideos = [];
         }
       })
     );

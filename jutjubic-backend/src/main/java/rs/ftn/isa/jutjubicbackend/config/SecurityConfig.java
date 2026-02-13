@@ -46,6 +46,7 @@ public class SecurityConfig {
                 .requestMatchers("/ws/**").permitAll() // WebSocket endpoint
                 .requestMatchers(HttpMethod.GET, "/api/map/**").permitAll()
                 .requestMatchers("/api/admin/**").permitAll() // For development/testing - should be secured in production
+                .requestMatchers("/api/etl/**").permitAll() // ETL endpoints - for development/testing - should be secured in production
                 .requestMatchers(HttpMethod.POST, "/api/videos/*/view").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/videos/*/comments").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()

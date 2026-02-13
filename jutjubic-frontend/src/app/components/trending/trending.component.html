@@ -1,9 +1,77 @@
 <div class="trending-container">
   <div class="trending-header">
     <svg viewBox="0 0 24 24" width="32" height="32">
-      <path fill="#FF0000" d="M17.53 11.2c-.23-.3-.5-.56-.76-.82-.65-.6-1.4-1.03-2.03-1.66C13.5 7.5 13 6.2 13 4.9c0-.17.01-.34.03-.5-.28.14-.55.31-.79.5-1.72 1.34-2.74 3.5-2.74 5.47 0 2.04.63 3.96 1.8 5.44 1.15 1.46 2.82 2.57 4.7 2.93.6.12 1.23.17 1.87.14-.16-.37-.34-.75-.55-1.12-.17-.3-.35-.6-.55-.9-.2-.3-.42-.6-.67-.87zM12 22c-4.97 0-9-4.03-9-9 0-2.25.83-4.32 2.19-5.91l.02-.02C6.77 5.5 8.27 4.24 10 3.56v1.34c0 1.3.5 2.6 1.5 3.6.63.63 1.4 1.08 2.06 1.68.28.26.54.54.79.86.1.13.2.26.28.4 1.2 1.64 1.87 3.64 1.87 5.66 0 2.4-1.07 4.55-2.75 6.02l-.05.04C13.06 22.85 12.54 23 12 23c-.54 0-1.06-.15-1.52-.44l-.03-.02v-.03c-.18-.13-.35-.28-.51-.44-.85-.85-1.39-2.02-1.39-3.3 0-1.23.5-2.34 1.31-3.16l.17-.17c.48-.47 1.1-.78 1.79-.87-.04.4-.06.8-.06 1.2 0 1.31.5 2.6 1.5 3.6.63.63 1.38 1.06 2.03 1.66.26.26.53.52.76.82z"/>
+      <path fill="#FF0000" d="M17.53 11.2c-.23-.3-.5-.56-.76-.82-.65-.6-1.4-1.03-2.03-1.66C13.5 7.5 13 6.2 13 4.9c0-.17.01-.34.03-.5-.28.14-.55.31-.79.5-1.72 1.34-2.74 3.5-2.74 5.47 0 2.04.63 3.96 1.8 5.44 1.15 1.46 2.82 2.57 4.7 2.93.6.12 1.23.17 1.87.14-.16-.37-.34-.75-.55-1.12-.17-.3-.35-.6-.55-.9-.2-.3-.42-.6-.67-.87zM12 22c-4.97 0-9-4.03-9-9 0-2.25.83-4.32 2.19-5.91l.02-.02C6.77 5.5 8.27 4.24 10 3.56v1.34c0 1.3.5 2.6 1.5 3.6.63.63 1.4 1.08 2.06 1.68.28.26.54.54.79.86.1.13.2.26.28.40 1.2 1.64 1.87 3.64 1.87 5.66 0 2.4-1.07 4.55-2.75 6.02l-.05.04C13.06 22.85 12.54 23 12 23c-.54 0-1.06-.15-1.52-.44l-.03-.02v-.03c-.18-.13-.35-.28-.51-.44-.85-.85-1.39-2.02-1.39-3.3 0-1.23.5-2.34 1.31-3.16l.17-.17c.48-.47 1.1-.78 1.79-.87-.04.4-.06.8-.06 1.2 0 1.31.5 2.6 1.5 3.6.63.63 1.38 1.06 2.03 1.66.26.26.53.52.76.82z"/>
     </svg>
     <h1>U trendu</h1>
+  </div>
+
+  <!-- Popular Videos Section -->
+  @if (popularVideos && popularVideos.length > 0) {
+    <div class="popular-videos-section">
+      <div class="popular-header">
+        <h2>
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <path fill="#FFD700" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+          Top 3 najpopularnija videa
+        </h2>
+        @if (popularVideosRunAt) {
+          <p class="popular-timestamp">Generisano: {{ formatRelativeTime(popularVideosRunAt) }}</p>
+        }
+      </div>
+
+      <div class="popular-videos-grid">
+        @for (item of popularVideos; track item.video.id; let idx = $index) {
+          <div class="popular-video-card" (click)="onVideoClick(item.video)">
+            <div class="rank-badge">{{ idx + 1 }}</div>
+            <div class="thumbnail-container">
+              @if (item.video.thumbnailUrl) {
+                <img [src]="environment.apiUrl + item.video.thumbnailUrl" [alt]="item.video.title" class="thumbnail" loading="lazy" />
+              } @else {
+                <div class="thumbnail-placeholder">
+                  <svg viewBox="0 0 24 24" width="48" height="48">
+                    <path fill="currentColor" d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+              }
+              <div class="duration-badge">{{ formatDuration(item.video.durationSeconds) }}</div>
+              <div class="thumbnail-overlay">
+                <svg viewBox="0 0 24 24" width="48" height="48">
+                  <path fill="currentColor" d="M8 5v14l11-7z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="video-info">
+              <div class="channel-avatar">
+                {{ getChannelInitials(item.video) }}
+              </div>
+              <div class="video-details">
+                <h3 class="video-title">{{ item.video.title }}</h3>
+                <p class="channel-name">{{ item.video.userFirstName }} {{ item.video.userLastName }}</p>
+                <p class="video-meta">
+                  <span>{{ formatViewCount(item.video.viewCount) }} pregleda</span>
+                  <span class="separator">•</span>
+                  <span>{{ formatRelativeTime(item.video.createdAt) }}</span>
+                </p>
+                <p class="popularity-score">
+                  <svg viewBox="0 0 24 24" width="16" height="16">
+                    <path fill="#FFD700" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                  </svg>
+                  Popularnost: {{ item.score.toFixed(1) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+  }
+
+  <div class="all-trending-header">
+    <h2>Svi popularni videi</h2>
   </div>
 
   <!-- Video Grid -->

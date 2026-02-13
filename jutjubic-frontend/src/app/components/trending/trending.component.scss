@@ -265,3 +265,111 @@ $border-color: #303030;
   }
 }
 
+// Popular Videos Section
+.popular-videos-section {
+  margin-bottom: 32px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 0, 0, 0.05) 100%);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.popular-header {
+  margin-bottom: 20px;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: $text-primary;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+  }
+
+  .popular-timestamp {
+    color: $text-secondary;
+    font-size: 13px;
+    margin: 0;
+  }
+}
+
+.popular-videos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+
+  @media (max-width: 1000px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.popular-video-card {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: $bg-card;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid transparent;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.2);
+    border-color: rgba(255, 215, 0, 0.3);
+
+    .thumbnail-overlay {
+      opacity: 1;
+    }
+  }
+}
+
+.rank-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #000;
+  font-weight: 700;
+  font-size: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.popularity-score {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #FFD700;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 4px 0 0 0;
+}
+
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, $border-color 50%, transparent 100%);
+  margin: 32px 0;
+}
+
+.all-trending-header {
+  margin-bottom: 24px;
+
+  h2 {
+    color: $text-primary;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
