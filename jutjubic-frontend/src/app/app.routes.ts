@@ -10,6 +10,9 @@ import { authGuard,guestGuard } from './guards/auth.guard';
 import { CreateVideoComponent } from './components/createVideo/createVideo.component';
 import { ProfileComponent } from './components/profile/profile.component';
 import { MapComponent } from './components/map/map.component';
+import { WatchPartyComponent } from './components/watch-party/watch-party.component';
+import { WatchPartyRoomComponent } from './components/watch-party-room/watch-party-room.component';
+import { WatchPartyJoinComponent } from './components/watch-party-join/watch-party-join.component';
 
 export const routes: Routes = [
   {
@@ -37,6 +40,22 @@ export const routes: Routes = [
         path: 'map',
         component: MapComponent,
       },
+      {
+        path: 'watch-party',
+        component: WatchPartyComponent,
+      },
+      {
+        path: 'watch-party/room/:roomId',
+        component: WatchPartyRoomComponent,
+      },
+      {
+        path: 'watch-party/join/:inviteCode',
+        component: WatchPartyJoinComponent,
+      },
+      {
+        path: 'users/:username',
+        component: ProfileComponent
+      },
     ],
   },
   {
@@ -52,10 +71,6 @@ export const routes: Routes = [
   {
     path: 'activate',
     component: ActivateComponent,
-  },
-  {
-     path: 'users/:username',
-     component: ProfileComponent
   },
   {
     path: '**',

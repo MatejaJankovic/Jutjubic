@@ -35,6 +35,13 @@ public class Video {
     @Column(name = "thumbnail_url")
     private String thumbnailUrl;
 
+    @Builder.Default
+    @Column(name = "thumbnail_compressed", nullable = false)
+    private boolean thumbnailCompressed = false;
+
+    @Column(name = "compressed_thumbnail_path")
+    private String compressedThumbnailPath;
+
     @Column(name = "duration_seconds")
     private Integer durationSeconds;
 

@@ -1,0 +1,599 @@
+@use 'sass:color';
+
+$bg-primary: #0f0f0f;
+$bg-secondary: #181818;
+$bg-card: #212121;
+$bg-hover: #383838;
+$text-primary: #ffffff;
+$text-secondary: #aaaaaa;
+$text-tertiary: #707070;
+$accent-red: #ff0000;
+$accent-green: #4CAF50;
+$accent-blue: #3ea6ff;
+$border-color: #303030;
+
+.watch-party-room-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-height: calc(100vh - 100px);
+}
+
+// Loading State
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 24px;
+  text-align: center;
+  color: $text-secondary;
+
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid $border-color;
+    border-top-color: $accent-red;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Error State
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+  color: $text-secondary;
+
+  svg {
+    margin-bottom: 24px;
+    opacity: 0.5;
+  }
+
+  h2 {
+    color: $text-primary;
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0 0 12px 0;
+  }
+
+  p {
+    font-size: 14px;
+    margin: 0 0 24px 0;
+  }
+}
+
+// Room Layout
+.room-layout {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 24px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Video Section
+.video-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.video-player-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: #000;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+// Waiting Overlay
+.waiting-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.waiting-content {
+  text-align: center;
+  color: $text-primary;
+
+  .waiting-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: $accent-blue;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: $text-secondary;
+    margin: 0;
+  }
+}
+
+// Switching Overlay
+.switching-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+}
+
+.switching-content {
+  text-align: center;
+  color: $text-primary;
+
+  .switching-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: $accent-green;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px auto;
+  }
+
+  p {
+    font-size: 14px;
+    color: $text-secondary;
+    margin: 0;
+  }
+}
+
+// Guest Controls Overlay
+.guest-controls-overlay {
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 5;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+.guest-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 6px;
+  color: $text-secondary;
+  font-size: 12px;
+
+  svg {
+    flex-shrink: 0;
+    color: $accent-blue;
+  }
+}
+
+// Video Switch Error
+.video-switch-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: rgba(244, 67, 54, 0.15);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 8px;
+  color: #f44336;
+  font-size: 13px;
+  margin-top: 12px;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+// Video Info
+.video-info {
+  background-color: $bg-card;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.video-title {
+  color: $text-primary;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.video-stats {
+  color: $text-secondary;
+  font-size: 14px;
+  margin-bottom: 16px;
+
+  .separator {
+    margin: 0 8px;
+  }
+}
+
+.channel-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $border-color;
+}
+
+.channel-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.channel-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.channel-name {
+  color: $text-primary;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.channel-username {
+  color: $text-secondary;
+  font-size: 12px;
+}
+
+.video-description {
+  margin-top: 16px;
+
+  p {
+    color: $text-secondary;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+// Sidebar
+.sidebar {
+  @media (max-width: 1100px) {
+    order: -1;
+  }
+}
+
+.sidebar-card {
+  background-color: $bg-card;
+  border-radius: 12px;
+  padding: 20px;
+
+  h3 {
+    color: $text-primary;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 20px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid $border-color;
+  }
+}
+
+// Connection Status
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 500;
+
+  &.connected {
+    background-color: rgba(76, 175, 80, 0.15);
+    color: $accent-green;
+
+    .status-dot {
+      background-color: $accent-green;
+    }
+  }
+
+  &.disconnected {
+    background-color: rgba(255, 152, 0, 0.15);
+    color: #ff9800;
+
+    .status-dot {
+      background-color: #ff9800;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  }
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+// Room Status
+.room-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 500;
+
+  &.waiting {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+  }
+
+  &.ready {
+    background-color: rgba(76, 175, 80, 0.15);
+    color: $accent-green;
+  }
+
+  &.playing {
+    background-color: rgba(255, 0, 0, 0.15);
+    color: $accent-red;
+  }
+
+  .status-icon {
+    font-size: 16px;
+  }
+}
+
+// Participants Section
+.participants-section {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    color: $text-secondary;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+}
+
+.participants-count {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  margin-bottom: 8px;
+
+  .count {
+    font-size: 28px;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  .max {
+    font-size: 16px;
+    color: $text-tertiary;
+  }
+}
+
+.participants-bar {
+  height: 6px;
+  background-color: $border-color;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.participants-fill {
+  height: 100%;
+  background: linear-gradient(90deg, $accent-green, lighten($accent-green, 10%));
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+// Invite Section
+.invite-section {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    color: $text-secondary;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+}
+
+.invite-input-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.invite-input {
+  flex: 1;
+  padding: 10px 12px;
+  background-color: $bg-secondary;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  color: $text-primary;
+  font-size: 12px;
+  font-family: monospace;
+
+  &:focus {
+    outline: none;
+    border-color: $accent-blue;
+  }
+}
+
+.copy-btn {
+  padding: 10px 14px;
+  background-color: $bg-hover;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  color: $text-primary;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background-color: lighten($bg-hover, 5%);
+    border-color: $text-tertiary;
+  }
+
+  &.success {
+    background-color: rgba(76, 175, 80, 0.2);
+    border-color: $accent-green;
+    color: $accent-green;
+  }
+}
+
+.invite-hint {
+  color: $text-tertiary;
+  font-size: 12px;
+  margin: 8px 0 0 0;
+}
+
+// Room Info Section
+.room-info-section {
+  margin-bottom: 20px;
+  padding: 12px;
+  background-color: $bg-secondary;
+  border-radius: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid $border-color;
+  }
+
+  .info-label {
+    color: $text-secondary;
+    font-size: 13px;
+  }
+
+  .info-value {
+    color: $text-primary;
+    font-size: 13px;
+    font-weight: 500;
+  }
+}
+
+// Buttons
+.btn-primary {
+  width: 100%;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, $accent-green 0%, darken($accent-green, 10%) 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, darken($accent-green, 5%) 0%, darken($accent-green, 15%) 100%);
+  }
+}
+
+.btn-outline {
+  width: 100%;
+  padding: 12px 20px;
+  background-color: transparent;
+  color: $text-secondary;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &:hover {
+    background-color: $bg-hover;
+    color: $text-primary;
+    border-color: $text-tertiary;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+

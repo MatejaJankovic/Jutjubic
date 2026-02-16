@@ -1,0 +1,30 @@
+<div class="watch-party-join-container">
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <h2>Pridruživanje Watch Party-ju...</h2>
+      <p>Molimo sačekajte dok vas povezujemo sa sobom</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error && !loading) {
+    <div class="error-card">
+      <svg viewBox="0 0 24 24" width="64" height="64">
+        <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+      </svg>
+      <h2>Nije moguće pridruživanje</h2>
+      <p>{{ error }}</p>
+      <div class="action-buttons">
+        <button class="btn-primary" (click)="goToCreate()">
+          Kreiraj novi Watch Party
+        </button>
+        <button class="btn-outline" (click)="goHome()">
+          Početna stranica
+        </button>
+      </div>
+    </div>
+  }
+</div>
+

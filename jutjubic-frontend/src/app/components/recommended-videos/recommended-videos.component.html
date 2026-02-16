@@ -1,0 +1,93 @@
+<div class="recommended-videos">
+  <h3 class="section-title">Preporučeni video snimci</h3>
+
+  <!-- Loading State -->
+  @if (loading && videos.length === 0) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Učitavanje videa...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error && videos.length === 0) {
+    <div class="error-state">
+      <p>{{ error }}</p>
+      <button class="btn-retry" (click)="loadRecommendedVideos()">Pokušaj ponovo</button>
+    </div>
+  }
+
+  <!-- Video List -->
+  @if (videos.length > 0) {
+    <div class="video-list">
+      @for (video of videos; track video.id) {
+        <div
+          class="video-card"
+          [class.clickable]="isOwner"
+          [class.disabled]="!isOwner"
+          (click)="onVideoClick(video)"
+          [title]="isOwner ? 'Kliknite da biste prešli na ovaj video' : 'Samo kreator sobe može menjati video'"
+        >
+          <div class="thumbnail-wrapper">
+            <img
+              [src]="video.thumbnailUrl ? environment.apiUrl + video.thumbnailUrl : 'assets/placeholder-thumbnail.jpg'"
+              [alt]="video.title"
+              class="thumbnail"
+            />
+            <span class="duration">{{ formatDuration(video.durationSeconds) }}</span>
+            @if (isOwner) {
+              <div class="play-overlay">
+                <svg viewBox="0 0 24 24" width="32" height="32">
+                  <path fill="currentColor" d="M8 5v14l11-7z"/>
+                </svg>
+              </div>
+            }
+          </div>
+          <div class="video-details">
+            <h4 class="video-title">{{ video.title }}</h4>
+            <div class="video-meta">
+              <span class="channel-name">{{ video.userFirstName }} {{ video.userLastName }}</span>
+              <span class="stats">
+                {{ formatViewCount(video.viewCount) }} pregleda • {{ formatRelativeTime(video.createdAt) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Load More Button -->
+    @if (hasMore) {
+      <button
+        class="btn-load-more"
+        (click)="loadMore()"
+        [disabled]="loadingMore"
+      >
+        @if (loadingMore) {
+          <span class="btn-spinner"></span>
+          Učitavanje...
+        } @else {
+          Prikaži više
+        }
+      </button>
+    }
+  }
+
+  <!-- Empty State -->
+  @if (!loading && !error && videos.length === 0) {
+    <div class="empty-state">
+      <p>Nema dostupnih preporučenih videa</p>
+    </div>
+  }
+
+  <!-- Role Indicator -->
+  @if (!isOwner) {
+    <div class="role-notice">
+      <svg viewBox="0 0 24 24" width="16" height="16">
+        <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+      </svg>
+      <span>Samo kreator sobe može menjati video</span>
+    </div>
+  }
+</div>
+

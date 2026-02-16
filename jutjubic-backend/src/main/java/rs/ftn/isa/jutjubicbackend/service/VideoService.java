@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import rs.ftn.isa.jutjubicbackend.dto.CreateVideoRequest;
 import rs.ftn.isa.jutjubicbackend.dto.VideoDTO;
 import rs.ftn.isa.jutjubicbackend.dto.VideoPageResponse;
+import rs.ftn.isa.jutjubicbackend.messaging.TranscodingProducer;
 import rs.ftn.isa.jutjubicbackend.model.User;
 import rs.ftn.isa.jutjubicbackend.model.Video;
 import rs.ftn.isa.jutjubicbackend.model.VideoLike;
@@ -41,6 +42,7 @@ public class VideoService {
     private final VideoLikeRepository videoLikeRepository;
     private final MapService mapService;
     private final CacheManager cacheManager;
+    private final TranscodingProducer transcodingProducer;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -197,6 +199,60 @@ public class VideoService {
                 .build();
     }
 
+    /**
+     * Get recommended videos (random order) with pagination.
+     * Optionally excludes a specific video from the results.
+     *
+     * @param excludeVideoId The video ID to exclude (optional, can be null)
+     * @param page Page number (0-based)
+     * @param size Number of videos per page
+     * @return VideoPageResponse containing random videos
+     */
+    public VideoPageResponse getRecommendedVideos(Long excludeVideoId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Video> videoPage;
+
+        if (excludeVideoId != null) {
+            videoPage = videoRepository.findRandomVideosExcluding(excludeVideoId, pageable);
+        } else {
+            videoPage = videoRepository.findRandomVideos(pageable);
+        }
+
+        return VideoPageResponse.builder()
+                .videos(videoPage.getContent().stream().map(this::toVideoDTO).toList())
+                .currentPage(videoPage.getNumber())
+                .totalPages(videoPage.getTotalPages())
+                .totalElements(videoPage.getTotalElements())
+                .hasNext(videoPage.hasNext())
+                .hasPrevious(videoPage.hasPrevious())
+                .build();
+    }
+
+    /**
+     * Get videos by username with pagination.
+     *
+     * @param username The username of the user
+     * @param page Page number (0-based)
+     * @param size Number of videos per page
+     * @return VideoPageResponse containing the user's videos
+     */
+    public VideoPageResponse getVideosByUsername(String username, int page, int size) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Korisnik nije pronađen"));
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Video> videoPage = videoRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), pageable);
+
+        return VideoPageResponse.builder()
+                .videos(videoPage.getContent().stream().map(this::toVideoDTO).toList())
+                .currentPage(videoPage.getNumber())
+                .totalPages(videoPage.getTotalPages())
+                .totalElements(videoPage.getTotalElements())
+                .hasNext(videoPage.hasNext())
+                .hasPrevious(videoPage.hasPrevious())
+                .build();
+    }
+
     @Transactional
     public VideoDTO createVideo(CreateVideoRequest request,
                                 MultipartFile video,
@@ -256,6 +312,10 @@ public class VideoService {
             String cacheKey = north + "_" + south + "_" + east + "_" + west + "_" + tile.zoom;
             mapService.evictTileCache(cacheKey);
 
+            // Publish transcoding request after successful upload and DB save
+            // This happens within the transaction, so if transaction rolls back, no message is sent
+            String absoluteVideoPath = videoPath.toAbsolutePath().toString();
+            transcodingProducer.publishTranscodingRequest(videoEntity.getId(), absoluteVideoPath);
 
             return VideoDTO.fromEntity(videoEntity);
 

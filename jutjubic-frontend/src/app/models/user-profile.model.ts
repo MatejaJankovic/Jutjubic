@@ -1,7 +1,9 @@
-// typescript
-// File: jutjubic-frontend/src/app/models/user-profile.model.ts
 export interface UserProfile {
+  id?: number;
   username: string;
   firstName?: string;
   lastName?: string;
+  email?: string;
+  createdAt?: string;
+  videoCount?: number;
 }
