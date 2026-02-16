@@ -157,9 +157,7 @@
       <!-- Sidebar for regular videos and after premiere ends -->
       <aside class="sidebar-section" *ngIf="!isPremiereMode || premiereStatus?.status === 'ENDED'">
         <h3>Preporučeni video snimci</h3>
-        <div class="suggested-placeholder">
-          <p>Preporučeni video snimci će biti dostupni uskoro</p>
-        </div>
+        <app-video-recommendations [currentVideoId]="video?.id || null"></app-video-recommendations>
       </aside>
     </div>
   }

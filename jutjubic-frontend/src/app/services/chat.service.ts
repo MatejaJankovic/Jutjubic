@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Client, IMessage } from '@stomp/stompjs';
+import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ChatMessage } from '../models/chat.model';
 import { environment } from '../env/environment';
@@ -36,7 +36,7 @@ export class ChatService {
     const socket = new SockJS(environment.apiUrl + '/ws');
     this.stompClient = new Client({
       webSocketFactory: () => socket as any,
-      debug: (str) => {
+      debug: (str: string) => {
         console.log('STOMP: ' + str);
       },
       reconnectDelay: 5000,
@@ -44,7 +44,7 @@ export class ChatService {
       heartbeatOutgoing: 4000,
     });
 
-    this.stompClient.onConnect = (frame) => {
+    this.stompClient.onConnect = (frame: any) => {
       console.log('Connected to WebSocket', frame.command);
       this.connectedSubject.next(true);
 
@@ -57,7 +57,7 @@ export class ChatService {
       this.sendJoinMessage(username, firstName, lastName);
     };
 
-    this.stompClient.onStompError = (frame) => {
+    this.stompClient.onStompError = (frame: any) => {
       console.error('STOMP error:', frame);
       this.connectedSubject.next(false);
     };

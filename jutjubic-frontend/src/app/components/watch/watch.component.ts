@@ -8,6 +8,7 @@ import { Subscription, filter, distinctUntilChanged, map, of, switchMap, tap, in
 import { CommentFormComponent } from '../comments/comment-form.component';
 import { CommentListComponent } from '../comments/comment-list.component';
 import { LiveChatComponent } from '../live-chat/live-chat.component';
+import { VideoRecommendationsComponent } from '../video-recommendations/video-recommendations.component';
 import { environment } from '../../env/environment';
 import { AuthService } from '../../services/auth.service';
 
@@ -15,7 +16,7 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-watch',
   standalone: true,
   imports: [CommonModule, RouterLink, CommentFormComponent,
-    CommentListComponent, LiveChatComponent],
+    CommentListComponent, LiveChatComponent, VideoRecommendationsComponent],
   templateUrl: './watch.component.html',
   styleUrls: ['./watch.component.scss'],
 })
