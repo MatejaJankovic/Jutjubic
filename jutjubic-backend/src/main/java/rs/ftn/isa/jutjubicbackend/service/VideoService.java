@@ -15,15 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 import rs.ftn.isa.jutjubicbackend.dto.CreateVideoRequest;
 import rs.ftn.isa.jutjubicbackend.dto.VideoDTO;
 import rs.ftn.isa.jutjubicbackend.dto.VideoPageResponse;
-import rs.ftn.isa.jutjubicbackend.model.User;
-import rs.ftn.isa.jutjubicbackend.model.Video;
-import rs.ftn.isa.jutjubicbackend.model.VideoLike;
-import rs.ftn.isa.jutjubicbackend.model.VideoView;
+import rs.ftn.isa.jutjubicbackend.model.*;
 import rs.ftn.isa.jutjubicbackend.repository.UserRepository;
 import rs.ftn.isa.jutjubicbackend.repository.VideoLikeRepository;
 import rs.ftn.isa.jutjubicbackend.repository.VideoRepository;
 import rs.ftn.isa.jutjubicbackend.repository.VideoViewRepository;
-
+import rs.ftn.isa.jutjubicbackend.protobuf.UploadEventProto;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,6 +33,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class VideoService {
+
+    @Autowired
+    private UploadEventJsonProducer jsonProducer;
+
+    @Autowired
+    private UploadEventProtobufProducer protobufProducer;
 
     private final VideoRepository videoRepository;
     private final VideoLikeRepository videoLikeRepository;
@@ -245,6 +248,16 @@ public class VideoService {
                     .build();
 
             videoRepository.save(videoEntity);
+
+            UploadEvent event = new UploadEvent(
+                    videoEntity.getTitle(),
+                    videoEntity.getUser().getUsername(),
+                    Files.size(videoPath),
+                    System.currentTimeMillis()
+            );
+
+            jsonProducer.sendJsonEvent(event);
+            protobufProducer.sendProtobufEvent(event);
 
             var tile = mapService.latLngToTile(videoEntity.getLatitude(), videoEntity.getLongitude(), 12); // npr. zoom 12
 

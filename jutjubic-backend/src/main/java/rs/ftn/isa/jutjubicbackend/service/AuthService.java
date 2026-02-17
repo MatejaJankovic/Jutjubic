@@ -2,6 +2,7 @@ package rs.ftn.isa.jutjubicbackend.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -15,6 +16,7 @@ import rs.ftn.isa.jutjubicbackend.dto.LoginRequest;
 import rs.ftn.isa.jutjubicbackend.dto.RegisterRequest;
 import rs.ftn.isa.jutjubicbackend.exception.BadRequestException;
 import rs.ftn.isa.jutjubicbackend.exception.ResourceNotFoundException;
+import rs.ftn.isa.jutjubicbackend.model.ActiveUsersMetrics;
 import rs.ftn.isa.jutjubicbackend.model.Role;
 import rs.ftn.isa.jutjubicbackend.model.User;
 import rs.ftn.isa.jutjubicbackend.repository.UserRepository;
@@ -33,6 +35,9 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+
+    @Autowired
+    private ActiveUsersMetrics activeUsersMetrics;
 
     @Transactional
     public void register(RegisterRequest request) {
@@ -106,6 +111,8 @@ public class AuthService {
 
             User user = (User) authentication.getPrincipal();
             String token = jwtTokenProvider.generateToken(authentication);
+
+            activeUsersMetrics.userLoggedIn();
 
             return AuthResponse.builder()
                     .token(token)
