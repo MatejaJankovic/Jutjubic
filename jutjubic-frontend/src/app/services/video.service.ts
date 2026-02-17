@@ -45,6 +45,25 @@ export class VideoService {
     return this.http.get<VideoPageResponse>(`${this.API_URL}/trending`, { params });
   }
 
+  getRecommendedVideos(excludeVideoId?: number, page: number = 0, size: number = 10): Observable<VideoPageResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    if (excludeVideoId) {
+      params = params.set('excludeVideoId', excludeVideoId.toString());
+    }
+
+    return this.http.get<VideoPageResponse>(`${this.API_URL}/recommended`, { params });
+  }
+
+  getVideosByUsername(username: string, page: number = 0, size: number = 12): Observable<VideoPageResponse> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+    return this.http.get<VideoPageResponse>(`${this.API_URL}/user/${encodeURIComponent(username)}`, { params });
+  }
+
   getPopularVideos(): Observable<PopularVideosResponse> {
     return this.http.get<PopularVideosResponse>('http://localhost:8080/api/etl/popular-videos');
   }

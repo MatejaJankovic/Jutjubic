@@ -1,0 +1,120 @@
+@use 'sass:color';
+
+$bg-primary: #0f0f0f;
+$bg-secondary: #181818;
+$bg-card: #212121;
+$bg-hover: #383838;
+$text-primary: #ffffff;
+$text-secondary: #aaaaaa;
+$text-tertiary: #707070;
+$accent-red: #ff0000;
+$accent-green: #4CAF50;
+$accent-blue: #3ea6ff;
+$border-color: #303030;
+
+.watch-party-join-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 100px);
+  padding: 24px;
+}
+
+.loading-card,
+.error-card {
+  background-color: $bg-card;
+  border-radius: 16px;
+  padding: 48px;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+}
+
+.spinner {
+  width: 56px;
+  height: 56px;
+  border: 4px solid $border-color;
+  border-top-color: $accent-blue;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 24px auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-card,
+.error-card {
+  h2 {
+    color: $text-primary;
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+  }
+
+  p {
+    color: $text-secondary;
+    font-size: 14px;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+.error-card {
+  svg {
+    color: $accent-red;
+    opacity: 0.8;
+    margin-bottom: 20px;
+  }
+
+  p {
+    margin-bottom: 24px;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, $accent-green 0%, darken($accent-green, 10%) 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, darken($accent-green, 5%) 0%, darken($accent-green, 15%) 100%);
+    transform: translateY(-1px);
+  }
+}
+
+.btn-outline {
+  width: 100%;
+  padding: 14px 24px;
+  background-color: transparent;
+  color: $text-secondary;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: $bg-hover;
+    color: $text-primary;
+    border-color: $text-tertiary;
+  }
+}
+

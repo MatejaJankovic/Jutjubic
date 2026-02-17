@@ -71,6 +71,26 @@ public class VideoController {
         return ResponseEntity.ok(videoService.getTrendingVideos(page, size));
     }
 
+    @GetMapping("/recommended")
+    public ResponseEntity<VideoPageResponse> getRecommendedVideos(
+            @RequestParam(required = false) Long excludeVideoId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(videoService.getRecommendedVideos(excludeVideoId, page, size));
+    }
+
+    @GetMapping("/user/{username}")
+    public ResponseEntity<VideoPageResponse> getVideosByUsername(
+            @PathVariable String username,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size) {
+        try {
+            return ResponseEntity.ok(videoService.getVideosByUsername(username, page, size));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VideoDTO> createVideo(

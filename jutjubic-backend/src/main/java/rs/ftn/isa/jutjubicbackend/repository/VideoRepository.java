@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import rs.ftn.isa.jutjubicbackend.model.PremiereStatus;
 import rs.ftn.isa.jutjubicbackend.model.Video;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -71,6 +72,22 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+    List<Video> findByThumbnailCompressedFalseAndCreatedAtBefore(LocalDateTime threshold);
+
+    List<Video> findByThumbnailCompressedFalse();
+
+    // Get videos excluding a specific video (for recommendations) - uses native query for PostgreSQL RANDOM()
+    @Query(value = "SELECT * FROM videos WHERE id <> :excludeVideoId ORDER BY RANDOM()",
+           countQuery = "SELECT COUNT(*) FROM videos WHERE id <> :excludeVideoId",
+           nativeQuery = true)
+    Page<Video> findRandomVideosExcluding(@Param("excludeVideoId") Long excludeVideoId, Pageable pageable);
+
+    // Get random videos without exclusion - uses native query for PostgreSQL RANDOM()
+    @Query(value = "SELECT * FROM videos ORDER BY RANDOM()",
+           countQuery = "SELECT COUNT(*) FROM videos",
+           nativeQuery = true)
+    Page<Video> findRandomVideos(Pageable pageable);
 
 }
 
