@@ -180,7 +180,163 @@ Unit testovi testiraju izolovanu logiku jedne klase bez pokretanja Spring kontek
 
 ## Integracioni testovi
 
-*(Biće dodato)*
+Integracioni testovi koriste `@WebMvcTest` koji pokreće **pravi Spring MVC kontekst** bez pune baze podataka. Testiraju se stvarne interakcije između slojeva:
+
+- **Spring MVC** – rutiranje HTTP zahteva, deserijalizacija JSON tela zahteva
+- **Bean Validation (`@Valid`)** – Hibernate Validator proverava `RegisterRequest` polja
+- **Spring Security filter chain** – `JwtAuthenticationFilter` + pravila iz `SecurityConfig`
+- **GlobalExceptionHandler** – prevodi izuzetke iz servisa u strukturirani HTTP odgovor
+- **Jackson serijalizacija** – konverzija Java objekata u JSON (npr. `isPublic` → `public`)
+
+Mokuju se samo: `AuthService`, `WatchPartyService`, `VideoService` (zahtevaju bazu), `JwtTokenProvider` (zahteva JWT secret iz konfiguracije), `UserDetailsService` (zahteva bazu korisnika).
+
+Pokretanje integrationih testova:
+```bash
+./mvnw test -Dtest="AuthControllerIntegrationTest,WatchPartyControllerIntegrationTest"
+```
+
+---
+
+### AuthControllerIntegrationTest
+
+**Lokacija:** `src/test/java/rs/ftn/isa/jutjubicbackend/controller/AuthControllerIntegrationTest.java`
+
+**Kontroler koji se testira:** `AuthController`
+
+**Mokovane zavisnosti:**
+- `AuthService` – servis koji zahteva bazu i email server
+- `LoginRateLimiterService` – in-memory rate limiter (stanje koje ne sme da utiče na testove)
+- `JwtTokenProvider` – zahteva JWT secret key iz konfiguracionih fajlova
+- `UserDetailsService` – zahteva bazu korisnika
+
+---
+
+#### Test IT-1 — `register_returns201WithSuccessMessage`
+
+**Šta testira:** Uspešan HTTP zahtev za registraciju prolazi kroz ceo MVC pipeline i vraća 201.
+
+**Kako radi:**
+1. Šalje `POST /api/auth/register` sa validnim JSON telom.
+2. Mock `authService.register(...)` ne radi ništa (simulacija uspešnog poziva).
+3. Proverava da je HTTP status **201 Created**.
+4. Proverava da JSON odgovor sadrži `success: true` i odgovarajuću poruku.
+
+**Zašto je smislen:** Testira pravu integraciju: HTTP deserijalizacija → Controller → servisni poziv → serializacija odgovora.
+
+---
+
+#### Test IT-2 — `register_returns400WithValidationErrorsWhenBodyIsInvalid`
+
+**Šta testira:** Spring `@Valid` anotacija i `GlobalExceptionHandler` vraćaju 400 sa detaljima greške validacije.
+
+**Kako radi:**
+1. Šalje `POST /api/auth/register` sa nevalidnim podacima (prazan email, kratko korisničko ime).
+2. Spring MVC automatski poziva Hibernate Validator (jer controller ima `@Valid`).
+3. `GlobalExceptionHandler.handleValidationExceptions()` hvata grešku.
+4. Proverava da je HTTP status **400**, da JSON sadrži `error: "Validation Failed"` i mapu `errors`.
+
+**Zašto je smislen:** Testira pravu integraciju: HTTP sloj → Bean Validation → GlobalExceptionHandler → strukturirani JSON odgovor sa poljem `errors`.
+
+---
+
+#### Test IT-3 — `register_returns400WithMessageWhenServiceThrowsBadRequest`
+
+**Šta testira:** `BadRequestException` iz `AuthService` prolazi kroz `GlobalExceptionHandler` i vraća 400 sa poljem `message`.
+
+**Kako radi:**
+1. Šalje validan `POST /api/auth/register`.
+2. Mock `authService.register(...)` baca `BadRequestException("Email adresa je već u upotrebi")`.
+3. `GlobalExceptionHandler.handleBadRequestException()` hvata izuzetak.
+4. Proverava da je HTTP status **400** i da JSON odgovor sadrži tačnu poruku.
+
+**Zašto je smislen:** Testira pravu integraciju između controller-a i GlobalExceptionHandler-a: izuzetak iz servisa → handler → ErrorResponse JSON (sa poljem `message`, a ne `success`).
+
+---
+
+#### Test IT-4 — `login_returns200WithTokenWhenCredentialsAreValid`
+
+**Šta testira:** Uspešna prijava integrisan sa rate limiterom vraća 200 sa JWT tokenom u JSON-u.
+
+**Kako radi:**
+1. Mock `rateLimiterService.isBlocked(...)` vraća `false` (IP nije blokiran).
+2. Mock `authService.login(...)` vraća `AuthResponse` sa JWT tokenom.
+3. Šalje `POST /api/auth/login` sa validnim podacima.
+4. Proverava da je HTTP status **200** i da JSON odgovor sadrži `token`, `type: "Bearer"` i `email`.
+
+**Zašto je smislen:** Testira pravu integraciju između `AuthController`, `LoginRateLimiterService` i formata odgovora: oba servisa moraju biti ispravno pozvana da bi se vratio 200.
+
+---
+
+#### Test IT-5 — `login_returns429WithRetryAfterHeaderWhenIpIsBlocked`
+
+**Šta testira:** Blokiran IP od strane rate limitera → `RateLimitExceededException` → `GlobalExceptionHandler` → 429 sa `Retry-After` headerom.
+
+**Kako radi:**
+1. Mock `rateLimiterService.isBlocked(...)` vraća `true`.
+2. Mock `rateLimiterService.getSecondsUntilReset(...)` vraća `42`.
+3. Proverava da je HTTP status **429 Too Many Requests**.
+4. Proverava da HTTP header `Retry-After` ima vrednost `"42"`.
+5. Proverava da JSON sadrži `status: 429`.
+
+**Zašto je smislen:** Testira niz interakcija: `LoginRateLimiterService` → Controller → `RateLimitExceededException` → `GlobalExceptionHandler` → HTTP header + status + JSON telo.
+
+---
+
+### WatchPartyControllerIntegrationTest
+
+**Lokacija:** `src/test/java/rs/ftn/isa/jutjubicbackend/controller/WatchPartyControllerIntegrationTest.java`
+
+**Kontroler koji se testira:** `WatchPartyController`
+
+**Mokovane zavisnosti:**
+- `WatchPartyService` – servis koji zahteva bazu
+- `VideoService` – servis koji zahteva bazu
+- `JwtTokenProvider` – zahteva JWT konfiguraciju
+- `UserDetailsService` – zahteva bazu korisnika
+
+---
+
+#### Test IT-6 — `createWatchParty_returns403WhenRequestHasNoJwtToken`
+
+**Šta testira:** Spring Security sa realnom `SecurityConfig` konfiguracijom odbija neautentifikovani POST zahtev sa 403.
+
+**Kako radi:**
+1. Šalje `POST /api/watch-party/create` **bez** `Authorization: Bearer ...` headera.
+2. `JwtAuthenticationFilter` ne pronalazi token – SecurityContext ostaje prazan.
+3. Spring Security vidi da endpoint zahteva autentifikaciju (`.anyRequest().authenticated()`).
+4. Proverava da je HTTP status **403 Forbidden**.
+
+**Zašto je smislen:** Testira pravu integraciju security filtera i konfiguracije: `JwtAuthenticationFilter` → `SecurityConfig` pravila → 403 odgovor. Ovo je ključan test koji proverava da zaštićeni endpointi zaista jesu zaštićeni.
+
+---
+
+#### Test IT-7 — `getWatchParty_returns404WhenRoomDoesNotExist`
+
+**Šta testira:** Autentifikovani GET zahtev za nepostojećom sobom prolazi kroz SecurityContext i vraća 404.
+
+**Kako radi:**
+1. `@WithMockUser` postavlja korisnika u SecurityContext (simulira JWT autentifikaciju).
+2. Mock `watchPartyService.findById(999L)` vraća `Optional.empty()`.
+3. Šalje `GET /api/watch-party/999`.
+4. Controller poziva `findById()`, dobija prazan Optional i vraća `ResponseEntity.notFound()`.
+5. Proverava da je HTTP status **404 Not Found**.
+
+**Zašto je smislen:** Testira integraciju: Spring Security propušta autentifikovani zahtev → Controller poziva servis → Optional.empty() → 404 odgovor.
+
+---
+
+#### Test IT-8 — `getWatchParty_returns200WithDtoWhenRoomExists`
+
+**Šta testira:** GET zahtev za postojećom sobom vraća 200 sa ispravno serijalizovanim `WatchPartyDTO` JSON-om.
+
+**Kako radi:**
+1. `@WithMockUser` autentifikuje korisnika.
+2. Mock `watchPartyService.findById(1L)` vraća `Optional` sa `WatchParty` entitetom.
+3. Šalje `GET /api/watch-party/1`.
+4. Controller poziva `WatchPartyDTO.fromEntity()` i Jackson serijalizuje DTO.
+5. Proverava da JSON sadrži `id: 1`, `inviteCode: "abc-123-def"` i `public: true` (ne `isPublic`).
+
+**Zašto je smislen:** Testira integraciju serijalizacije: `WatchParty` entitet → `WatchPartyDTO.fromEntity()` → Jackson → JSON sa `public` (umesto `isPublic`, jer Lombok/Jackson skida prefiks `is` kod boolean gettera).
 
 ---
 
