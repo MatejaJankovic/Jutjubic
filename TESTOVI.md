@@ -144,7 +144,7 @@ Testira kritično sigurnosno pravilo i potvrđuje da se WebSocket poruka ne šal
 
 ---
 
-#### Test 10 — `getLatestPopularVideos_returnsEmptyOptionalWhenNoPipelineRunYet`
+#### Test 7 — `getLatestPopularVideos_returnsEmptyOptionalWhenNoPipelineRunYet`
 
 **Šta testira:** Ponašanje kada pipeline još nije ni jednom pokrenut.
 
@@ -158,7 +158,7 @@ Pokriva edge case – sistem mora elegantno da odgovori pre prvog ETL pokretanja
 
 ---
 
-#### Test 11 — `runETLPipeline_savesPopularVideoRecordEvenWithNoViews`
+#### Test 8 — `runETLPipeline_savesPopularVideoRecordEvenWithNoViews`
 
 **Šta testira:** Robusnost ETL pipeline-a kada nema pregleda u poslednjih 7 dana.
 
@@ -352,7 +352,7 @@ cd e2e
 npx playwright test
 ```
 
-**Napomena:** Testovi E2E-1, E2E-2 i E2E-3 ne zahtevaju prethodno prijavljivanje. Test E2E-4 koristi programatsku prijavu direktnim API pozivom kako bi izbegao ponavljanje UI toka prijave — JWT token se upisuje u `localStorage` onako kako to Angular `AuthService` očekuje.
+**Napomena:** Testovi E2E-1, E2E-2 i E2E-3 ne zahtevaju prethodno prijavljivanje. Testovi E2E-4 i E2E-5 koriste programatsku prijavu direktnim API pozivom kako bi izbegli ponavljanje UI toka prijave — JWT token se upisuje u `localStorage` onako kako to Angular `AuthService` očekuje.
 
 ---
 
@@ -422,3 +422,21 @@ Pokriva i klijentsku validaciju (Angular Reactive Forms) i serverski uspešan od
 6. Proverava da `.info-row` sa labelom `Uloga` prikazuje `Kreator`.
 
 Potvrđuje integraciju: Angular → JWT interceptor → Spring Security → WatchPartyService → kreiranje sobe u bazi → WebSocket priprema → navigacija → prikaz sobe.
+
+---
+
+### E2E-5 — ETL pipeline prikazuje popularne videe prijavljenom korisniku
+
+**Fajl:** `e2e/tests/etl.spec.ts`
+
+**Šta testira:** Kompletan tok ETL modula — od generisanja pregleda videa, preko pokretanja pipeline-a, do prikaza sekcije „Top 3 najpopularnija videa" na stranici „U trendu".
+
+**Kako radi:**
+1. **Generisanje pregleda:** 5× direktan API poziv `POST /api/videos/1/view` upisuje `VideoView` redove (podaci za Extract fazu iz poslednjih 7 dana).
+2. **Pokretanje pipeline-a:** `POST /api/etl/run-pipeline` — proverava status 200 (Extract → Transform → Load).
+3. **Backend verifikacija:** `GET /api/etl/popular-videos` vraća 200; proverava da `pipelineRunAt` postoji i da `topVideos` ima između 1 i 3 elementa.
+4. **Programatska prijava** i navigacija na `/trending`.
+5. Proverava da je `.popular-videos-section` vidljiva i da sadrži naslov „Top 3 najpopularnija videa" i vremensku oznaku (`.popular-timestamp`).
+6. Proverava da je prikazana barem jedna `.popular-video-card` (max 3), sa rang badge-om „1" i tekstom „Popularnost" (popularity score).
+
+Potvrđuje integraciju celog sistema: zabeleženi pregledi → `ETLService` (Extract/Transform/Load) → `PopularVideo` tabela → `GET /api/etl/popular-videos` → Angular `TrendingComponent` → prikaz top 3 videa korisniku.
