@@ -1,11 +1,8 @@
-# Testovi – Jutjubic projekat
+# Testovi - Jutjubic projekat
 
 ## Sadržaj
 
 - [Unit testovi](#unit-testovi)
-  - [AuthServiceTest](#authservicetest)
-  - [WatchPartyServiceTest](#watchpartyservicetest)
-  - [ETLServiceTest](#etlservicetest)
 - [Integracioni testovi](#integracioni-testovi)
 - [E2E testovi](#e2e-testovi)
 
@@ -44,7 +41,7 @@ Unit testovi testiraju izolovanu logiku jedne klase bez pokretanja Spring kontek
 3. Proverava da li je bačen `BadRequestException` sa porukom `"Lozinke se ne poklapaju"`.
 4. Verifikuje da `UserRepository` **nije ni pozvan** (greška je detektovana pre bilo kakvog DB poziva).
 
-**Zašto je smislen:** Potvrđuje da se validacija lozinke dešava na prvom mestu, pre pristupa bazi.
+Potvrđuje da se validacija lozinke dešava na prvom mestu, pre pristupa bazi.
 
 ---
 
@@ -59,7 +56,7 @@ Unit testovi testiraju izolovanu logiku jedne klase bez pokretanja Spring kontek
 4. Proverava da je bačen `BadRequestException` sa porukom `"Email adresa je već u upotrebi"`.
 5. Verifikuje da `userRepository.save(...)` **nikada nije pozvan**.
 
-**Zašto je smislen:** Garantuje da se dupli nalog ne može kreirati čak i ako se zaobiđe frontend validacija.
+Garantuje da se dupli nalog ne može kreirati čak i ako se zaobiđe frontend validacija.
 
 ---
 
@@ -73,7 +70,7 @@ Unit testovi testiraju izolovanu logiku jedne klase bez pokretanja Spring kontek
 3. Poziva `authService.login(request)`.
 4. Proverava da `AuthService` pretvara Spring Security izuzetak u domenski `BadRequestException` sa odgovarajućom porukom.
 
-**Zašto je smislen:** Testira da se Spring Security izuzeci pravilno mapiraju u API odgovore razumljive klijentu.
+Testira da se Spring Security izuzeci pravilno mapiraju u API odgovore razumljive klijentu.
 
 ---
 
@@ -101,7 +98,7 @@ Unit testovi testiraju izolovanu logiku jedne klase bez pokretanja Spring kontek
 5. Proverava da skup `participantIds` sadrži ID kreatora (`42L`).
 6. Verifikuje da je `repository.save(...)` pozvan tačno jednom.
 
-**Zašto je smislen:** Pokriva centralnu funkcionalnost Watch Party-ja i garantuje jedinstvenost invite koda i ispravno inicijalno stanje sobe.
+Pokriva centralnu funkcionalnost Watch Party-ja i garantuje jedinstvenost invite koda i ispravno inicijalno stanje sobe.
 
 ---
 
@@ -115,7 +112,7 @@ Unit testovi testiraju izolovanu logiku jedne klase bez pokretanja Spring kontek
 3. Proverava da je bačen `RuntimeException` sa porukom `"Watch party not found"`.
 4. Verifikuje da `repository.save(...)` **nikada nije pozvan**.
 
-**Zašto je smislen:** Osigurava da korisnik ne može da se pridruži nepostojećoj sobi, a da pritom nema neželjenih efekata na bazu.
+Osigurava da korisnik ne može da se pridruži nepostojećoj sobi, a da pritom nema neželjenih efekata na bazu.
 
 ---
 
@@ -130,7 +127,7 @@ Unit testovi testiraju izolovanu logiku jedne klase bez pokretanja Spring kontek
 4. Proverava da je bačen `RuntimeException` sa porukom `"Only the room owner can switch videos"`.
 5. Verifikuje da `repository.save(...)` i `messagingTemplate.convertAndSend(...)` **nikada nisu pozvani** (nema neželjenog broadcast-a).
 
-**Zašto je smislen:** Testira kritično sigurnosno pravilo i potvrđuje da se WebSocket poruka ne šalje u slučaju neautorizovanog pristupa.
+Testira kritično sigurnosno pravilo i potvrđuje da se WebSocket poruka ne šalje u slučaju neautorizovanog pristupa.
 
 ---
 
@@ -157,7 +154,7 @@ Unit testovi testiraju izolovanu logiku jedne klase bez pokretanja Spring kontek
 3. Proverava da je vraćen prazan `Optional`.
 4. Verifikuje da je `findLatest()` pozvan tačno jednom.
 
-**Zašto je smislen:** Pokriva edge case – sistem mora elegantno da odgovori pre prvog ETL pokretanja, bez izuzetaka.
+Pokriva edge case – sistem mora elegantno da odgovori pre prvog ETL pokretanja, bez izuzetaka.
 
 ---
 
@@ -174,7 +171,7 @@ Unit testovi testiraju izolovanu logiku jedne klase bez pokretanja Spring kontek
 6. Verifikuje da je `popularVideoRepository.save(...)` pozvan (Load faza izvršena, čak i sa praznim rezultatom).
 7. Verifikuje da `videoRepository` **nije ni pozvan** (nije potreban kada nema pregleda).
 
-**Zašto je smislen:** Potvrđuje da pipeline ne pada pri praznim podacima i da sve tri faze (Extract, Transform, Load) funkcionišu ispravno i u tom slučaju.
+Potvrđuje da pipeline ne pada pri praznim podacima i da sve tri faze (Extract, Transform, Load) funkcionišu ispravno i u tom slučaju.
 
 ---
 
@@ -221,7 +218,7 @@ Pokretanje integrationih testova:
 3. Proverava da je HTTP status **201 Created**.
 4. Proverava da JSON odgovor sadrži `success: true` i odgovarajuću poruku.
 
-**Zašto je smislen:** Testira pravu integraciju: HTTP deserijalizacija → Controller → servisni poziv → serializacija odgovora.
+Testira pravu integraciju: HTTP deserijalizacija → Controller → servisni poziv → serializacija odgovora.
 
 ---
 
@@ -235,7 +232,7 @@ Pokretanje integrationih testova:
 3. `GlobalExceptionHandler.handleValidationExceptions()` hvata grešku.
 4. Proverava da je HTTP status **400**, da JSON sadrži `error: "Validation Failed"` i mapu `errors`.
 
-**Zašto je smislen:** Testira pravu integraciju: HTTP sloj → Bean Validation → GlobalExceptionHandler → strukturirani JSON odgovor sa poljem `errors`.
+Testira pravu integraciju: HTTP sloj → Bean Validation → GlobalExceptionHandler → strukturirani JSON odgovor sa poljem `errors`.
 
 ---
 
@@ -249,7 +246,7 @@ Pokretanje integrationih testova:
 3. `GlobalExceptionHandler.handleBadRequestException()` hvata izuzetak.
 4. Proverava da je HTTP status **400** i da JSON odgovor sadrži tačnu poruku.
 
-**Zašto je smislen:** Testira pravu integraciju između controller-a i GlobalExceptionHandler-a: izuzetak iz servisa → handler → ErrorResponse JSON (sa poljem `message`, a ne `success`).
+Testira pravu integraciju između controller-a i GlobalExceptionHandler-a: izuzetak iz servisa → handler → ErrorResponse JSON (sa poljem `message`, a ne `success`).
 
 ---
 
@@ -263,7 +260,7 @@ Pokretanje integrationih testova:
 3. Šalje `POST /api/auth/login` sa validnim podacima.
 4. Proverava da je HTTP status **200** i da JSON odgovor sadrži `token`, `type: "Bearer"` i `email`.
 
-**Zašto je smislen:** Testira pravu integraciju između `AuthController`, `LoginRateLimiterService` i formata odgovora: oba servisa moraju biti ispravno pozvana da bi se vratio 200.
+Testira pravu integraciju između `AuthController`, `LoginRateLimiterService` i formata odgovora: oba servisa moraju biti ispravno pozvana da bi se vratio 200.
 
 ---
 
@@ -278,7 +275,7 @@ Pokretanje integrationih testova:
 4. Proverava da HTTP header `Retry-After` ima vrednost `"42"`.
 5. Proverava da JSON sadrži `status: 429`.
 
-**Zašto je smislen:** Testira niz interakcija: `LoginRateLimiterService` → Controller → `RateLimitExceededException` → `GlobalExceptionHandler` → HTTP header + status + JSON telo.
+Testira niz interakcija: `LoginRateLimiterService` → Controller → `RateLimitExceededException` → `GlobalExceptionHandler` → HTTP header + status + JSON telo.
 
 ---
 
@@ -306,7 +303,7 @@ Pokretanje integrationih testova:
 3. Spring Security vidi da endpoint zahteva autentifikaciju (`.anyRequest().authenticated()`).
 4. Proverava da je HTTP status **403 Forbidden**.
 
-**Zašto je smislen:** Testira pravu integraciju security filtera i konfiguracije: `JwtAuthenticationFilter` → `SecurityConfig` pravila → 403 odgovor. Ovo je ključan test koji proverava da zaštićeni endpointi zaista jesu zaštićeni.
+Testira pravu integraciju security filtera i konfiguracije: `JwtAuthenticationFilter` → `SecurityConfig` pravila → 403 odgovor. Ovo je ključan test koji proverava da zaštićeni endpointi zaista jesu zaštićeni.
 
 ---
 
@@ -321,7 +318,7 @@ Pokretanje integrationih testova:
 4. Controller poziva `findById()`, dobija prazan Optional i vraća `ResponseEntity.notFound()`.
 5. Proverava da je HTTP status **404 Not Found**.
 
-**Zašto je smislen:** Testira integraciju: Spring Security propušta autentifikovani zahtev → Controller poziva servis → Optional.empty() → 404 odgovor.
+Testira integraciju: Spring Security propušta autentifikovani zahtev → Controller poziva servis → Optional.empty() → 404 odgovor.
 
 ---
 
@@ -336,10 +333,92 @@ Pokretanje integrationih testova:
 4. Controller poziva `WatchPartyDTO.fromEntity()` i Jackson serijalizuje DTO.
 5. Proverava da JSON sadrži `id: 1`, `inviteCode: "abc-123-def"` i `public: true` (ne `isPublic`).
 
-**Zašto je smislen:** Testira integraciju serijalizacije: `WatchParty` entitet → `WatchPartyDTO.fromEntity()` → Jackson → JSON sa `public` (umesto `isPublic`, jer Lombok/Jackson skida prefiks `is` kod boolean gettera).
+Testira integraciju serijalizacije: `WatchParty` entitet → `WatchPartyDTO.fromEntity()` → Jackson → JSON sa `public` (umesto `isPublic`, jer Lombok/Jackson skida prefiks `is` kod boolean gettera).
 
 ---
 
 ## E2E testovi
 
-*(Biće dodato)*
+E2E (end-to-end) testovi pokreću pravi Chromium pretraživač i testiraju **kompletne korisničke tokove** — od Angular frontend-a, kroz HTTP zahteve, sve do Spring Boot backend-a i PostgreSQL baze. Za razliku od integracioni testova koji testiraju samo HTTP sloj, E2E testovi potvrđuju da **ceo sistem radi zajedno** iz perspektive korisnika.
+
+**Alat:** [Playwright](https://playwright.dev/) (TypeScript), `@playwright/test` v1.49  
+**Pretraživač:** Chromium (headless)  
+**Lokacija testova:** `e2e/tests/`  
+**Konfiguracija:** `e2e/playwright.config.ts` (baseURL: `http://localhost:4200`)
+
+Pokretanje E2E testova (Docker stack mora biti pokrenut):
+```bash
+cd e2e
+npx playwright test
+```
+
+**Napomena:** Testovi E2E-1, E2E-2 i E2E-3 ne zahtevaju prethodno prijavljivanje. Test E2E-4 koristi programatsku prijavu direktnim API pozivom kako bi izbegao ponavljanje UI toka prijave — JWT token se upisuje u `localStorage` onako kako to Angular `AuthService` očekuje.
+
+---
+
+### E2E-1 — Uspešna prijava preusmerava korisnika na početnu stranicu
+
+**Fajl:** `e2e/tests/login.spec.ts`
+
+**Šta testira:** Kompletan tok prijave korisnika – unos kredencijala u formu, klik na dugme, navigacija na početnu stranicu i prikaz avatara umesto linka za prijavu.
+
+**Kako radi:**
+1. Otvara stranicu `/login` i proverava naslov `Prijava`.
+2. Popunjava polja `#email` i `#password` sa kredencijalima seed korisnika (`jankovicmatejabp@gmail.com` / `Test@12345`).
+3. Klik na `button[type="submit"]`, čeka navigaciju na `http://localhost:4200/`.
+4. Proverava da je `.profile-btn` (avatar korisnika) vidljiv.
+5. Proverava da `.btn-signin` (link "Prijava" u navbar-u) **nije** vidljiv.
+
+Potvrđuje da Angular router ispravno preusmerava, da JWT token pristiže i čuva se u `localStorage`, i da navbar odražava stanje autentifikacije.
+
+---
+
+### E2E-2 — Pogrešna lozinka prikazuje poruku greške
+
+**Fajl:** `e2e/tests/login.spec.ts`
+
+**Šta testira:** Negativan scenario prijave – pogrešna lozinka ne sme da preusmerava korisnika i mora prikazati grešku.
+
+**Kako radi:**
+1. Otvara `/login`, popunjava `#email` sa tačnom adresom ali `#password` sa pogrešnom lozinkom.
+2. Čeka HTTP odgovor od backend-a (`/api/auth/login`) sa statusom 400.
+3. Proverava da je `.alert-error` vidljiv.
+4. Proverava da URL i dalje sadrži `/login` (nije došlo do preusmeravanja).
+5. Proverava da `.profile-btn` **nije** vidljiv (korisnik nije prijavljen).
+
+Potvrđuje da Angular prikazuje serversku grešku korisniku i da ne dolazi do lažne autentifikacije.
+
+---
+
+### E2E-3 — Registracija validira formu i prikazuje poruku uspeha
+
+**Fajl:** `e2e/tests/register.spec.ts`
+
+**Šta testira:** Dvostruki scenario – najpre Angular validacija prazne forme (klijentska strana), potom uspešna registracija sa validnim podacima.
+
+**Kako radi:**
+1. Otvara `/register` i proverava naslov `Registracija`.
+2. **Korak 1 – prazna forma:** klik na submit bez popunjavanja polja; proverava da `.error-message` elementi postanu vidljivi i da URL ostaje `/register`.
+3. **Korak 2 – validni podaci:** popunjava sva polja (`#firstName`, `#lastName`, `#email` sa jedinstvenim timestamp emailom, `#username`, `#address`, `#password`, `#confirmPassword`).
+4. Čeka HTTP odgovor `/api/auth/register` sa statusom 201.
+5. Proverava da je `.alert-success` vidljiv i da sadrži tekst `Registracija uspešna`.
+
+Pokriva i klijentsku validaciju (Angular Reactive Forms) i serverski uspešan odgovor u jednom toku.
+
+---
+
+### E2E-4 — Prijavljen korisnik kreira Watch Party sobu
+
+**Fajl:** `e2e/tests/watch-party.spec.ts`
+
+**Šta testira:** Kompletan tok kreiranja Watch Party sobe — prijava, navigacija, izbor videa, kreiranje sobe i provera invite linka.
+
+**Kako radi:**
+1. **Programatska prijava:** direktan API poziv na `/api/auth/login`, JWT token se upisuje u `localStorage['auth_token']`, a puna `AuthResponse` u `localStorage['current_user']`. Stranica se osveži da bi Angular preuzeo stanje.
+2. Navigacija na `/watch-party`; čeka da `.create-party-btn` bude vidljiv (lista videa učitana).
+3. Klik na prvo dugme "Kreiraj Watch Party"; čeka HTTP odgovor `POST /api/watch-party/create` sa statusom 200.
+4. Proverava da URL prati obrazac `/watch-party/room/<uuid>`.
+5. Proverava da `.invite-input` (readonly polje) sadrži UUID invite kod.
+6. Proverava da `.info-row` sa labelom `Uloga` prikazuje `Kreator`.
+
+Potvrđuje integraciju: Angular → JWT interceptor → Spring Security → WatchPartyService → kreiranje sobe u bazi → WebSocket priprema → navigacija → prikaz sobe.
